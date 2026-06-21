@@ -15,8 +15,8 @@
 
 | | |
 |---|---|
-| **Live Website** | `https://glamoura.vercel.app` |
-| **Admin Panel** | `https://glamoura.vercel.app` → click Admin tab |
+| **Live Website** | `https://glamoura-eta.vercel.app` |
+| **Admin Panel** | `https://glamoura-eta.vercel.app` → click Admin tab |
 | **Admin Login** | Username: `admin` · Password: `admin` |
 
 ---
