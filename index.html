@@ -1,0 +1,2214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <title>Glamoura — Delhi Luxury Salon Marketplace</title>
+  <meta name="robots" content="index, follow">
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  <meta name="description" content="Discover and book top luxury salons in Delhi — Bridal, Hair, Skin & Beauty">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --gold:#C9A84C;--gold-light:#E8C97A;--gold-dark:#9A7A32;--gold-dim:#C9A84C22;
+    --black:#0A0A0A;--off-black:#141414;--dark:#1A1A1A;
+    --cream:#FAF7F2;--warm-white:#F5F0E8;
+    --text-primary:#0A0A0A;--text-muted:#6B6B6B;--text-light:#9A9A9A;
+    --border:#E8E0D0;--border-light:#F0EAE0;
+    --danger:#C0392B;--danger-light:#FDEDEC;
+    --success:#27AE60;--success-light:#EAFAF1;
+    --warn:#E67E22;--warn-light:#FEF9E7;
+    --sidebar:230px;
+    --radius:10px;
+  }
+  html,body{height:100%;font-family:'Inter',sans-serif;background:var(--cream);color:var(--text-primary);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  button,input,select,textarea{font-family:inherit}
+  a{color:inherit;text-decoration:none}
+
+  /* ─── VIEWS ─── */
+  #view-customer{display:block}
+  #view-admin{display:none}
+  #view-admin.active{display:flex}
+
+  /* ─── TOP NAV BAR ─── */
+  .top-nav{
+    position:fixed;top:0;left:0;right:0;z-index:500;
+    background:rgba(10,10,10,.92);backdrop-filter:blur(12px);
+    border-bottom:1px solid rgba(201,168,76,.15);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 1.5rem;height:56px;
+  }
+  .top-nav-logo{font-family:'Playfair Display',serif;font-size:20px;color:var(--gold-light);letter-spacing:2.5px;cursor:pointer}
+  .top-nav-logo span{color:#fff;font-weight:400}
+  .top-nav-tabs{display:flex;gap:2px;align-items:center}
+  .nav-tab{
+    padding:.45rem .9rem;border-radius:6px;font-size:13px;font-weight:500;
+    color:#999;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:5px;
+    border:1px solid transparent;
+  }
+  .nav-tab:hover{color:#ddd;background:rgba(255,255,255,.06)}
+  .nav-tab.active{color:var(--gold);background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.25)}
+  .nav-tab i{font-size:15px}
+  .top-nav-right{display:flex;align-items:center;gap:.6rem}
+  .nav-cta{
+    background:var(--gold);color:var(--black);border:none;
+    padding:.4rem 1rem;border-radius:6px;font-size:12px;font-weight:700;
+    cursor:pointer;letter-spacing:.3px;transition:.15s;
+  }
+  .nav-cta:hover{background:var(--gold-light)}
+
+  /* ─── CUSTOMER SITE ─── */
+  #view-customer{padding-top:56px}
+
+  /* Hero */
+  .hero{
+    background:var(--black);min-height:88vh;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;padding:3rem 1.5rem;
+    text-align:center;
+  }
+  .hero-bg{
+    position:absolute;inset:0;
+    background:radial-gradient(ellipse 70% 60% at 50% 40%,rgba(201,168,76,.12) 0%,transparent 70%),
+               linear-gradient(to bottom,#0A0A0A 0%,#111 100%);
+  }
+  .hero-orb{
+    position:absolute;width:500px;height:500px;border-radius:50%;
+    background:radial-gradient(circle,rgba(201,168,76,.07) 0%,transparent 70%);
+    top:50%;left:50%;transform:translate(-50%,-50%);
+    animation:pulse 6s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.5}50%{transform:translate(-50%,-50%) scale(1.15);opacity:1}}
+  .hero-content{position:relative;max-width:700px}
+  .hero-eyebrow{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:1.5rem}
+  .hero-h1{font-family:'Playfair Display',serif;font-size:clamp(2.6rem,6vw,4.5rem);line-height:1.1;color:#fff;font-weight:700;margin-bottom:1.25rem}
+  .hero-h1 em{color:var(--gold-light);font-style:italic}
+  .hero-sub{font-size:1.05rem;color:#888;line-height:1.7;max-width:500px;margin:0 auto 2rem}
+  .hero-search{
+    display:flex;gap:.5rem;max-width:480px;margin:0 auto;
+    background:rgba(255,255,255,.05);border:1px solid rgba(201,168,76,.25);
+    border-radius:12px;padding:.35rem .35rem .35rem .9rem;
+  }
+  .hero-search input{
+    flex:1;background:transparent;border:none;color:#fff;font-size:14px;outline:none;
+  }
+  .hero-search input::placeholder{color:#555}
+  .hero-search-btn{
+    background:var(--gold);color:var(--black);border:none;
+    padding:.55rem 1.1rem;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;gap:5px;transition:.15s;flex-shrink:0;
+  }
+  .hero-search-btn:hover{background:var(--gold-light)}
+  .hero-stats{display:flex;gap:2rem;justify-content:center;margin-top:2.5rem;flex-wrap:wrap}
+  .hero-stat{text-align:center}
+  .hero-stat-num{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--gold-light);font-weight:700}
+  .hero-stat-lbl{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#555;margin-top:2px}
+
+  /* Filter bar */
+  .filter-bar{
+    background:#fff;border-bottom:1px solid var(--border);
+    padding:.75rem 1.5rem;display:flex;align-items:center;gap:.6rem;
+    overflow-x:auto;scrollbar-width:none;position:sticky;top:56px;z-index:100;
+  }
+  .filter-bar::-webkit-scrollbar{display:none}
+  .filter-lbl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);white-space:nowrap;font-weight:600;margin-right:.2rem}
+  .filter-chip{
+    padding:.35rem .85rem;border-radius:20px;border:1px solid var(--border);
+    font-size:12px;color:var(--text-muted);cursor:pointer;transition:.15s;
+    white-space:nowrap;display:flex;align-items:center;gap:4px;background:#fff;
+  }
+  .filter-chip:hover{border-color:var(--gold-dark);color:var(--gold-dark)}
+  .filter-chip.active{background:var(--gold);color:var(--black);border-color:var(--gold);font-weight:600}
+
+  /* Salons section */
+  .salons-section{padding:2rem 1.5rem;max-width:1300px;margin:0 auto}
+  .section-hd{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.5rem}
+  .section-hd h2{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700}
+  .section-hd span{font-size:13px;color:var(--text-muted)}
+  .salons-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.25rem}
+
+  /* Salon card */
+  .salon-card{touch-action:manipulation;
+    background:#fff;border:1px solid var(--border);border-radius:14px;
+    overflow:hidden;cursor:pointer;transition:.2s;position:relative;
+  }
+  .salon-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.1);border-color:var(--gold-dark)}
+  .card-img{
+    height:160px;background:linear-gradient(135deg,#1a1a1a,#2a2219);
+    display:flex;align-items:center;justify-content:center;
+    font-size:3rem;position:relative;overflow:hidden;
+  }
+  .card-img-pattern{
+    position:absolute;inset:0;
+    background:repeating-linear-gradient(45deg,rgba(201,168,76,.04) 0px,rgba(201,168,76,.04) 1px,transparent 1px,transparent 12px);
+  }
+  .card-img-emoji{position:relative;z-index:1}
+  .card-badge{
+    position:absolute;top:.75rem;left:.75rem;z-index:2;
+    padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.5px;
+  }
+  .badge-bridal{background:#F9EEE2;color:#8B5E3C;border:1px solid #E8CFA8}
+  .badge-luxury{background:#EEEDF8;color:#534AB7;border:1px solid #CECBF6}
+  .badge-premium{background:#EDF5EA;color:#3B6D11;border:1px solid #C0DD97}
+  .card-open-pill{
+    position:absolute;top:.75rem;right:.75rem;z-index:2;
+    display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:10px;
+    font-size:10px;font-weight:600;
+  }
+  .card-open-pill.open{background:#EAFAF1;color:var(--success);border:1px solid #A9DFBF}
+  .card-open-pill.closed{background:#FDEDEC;color:var(--danger);border:1px solid #F0BABA}
+  .card-open-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+  .card-body{padding:1rem 1.1rem}
+  .card-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:.2rem;line-height:1.2}
+  .card-locality{font-size:12px;color:var(--text-muted);margin-bottom:.6rem}
+  .card-meta{display:flex;align-items:center;gap:.65rem;font-size:12px;flex-wrap:wrap}
+  .card-rating{display:flex;align-items:center;gap:3px;color:var(--gold-dark);font-weight:600}
+  .card-rating span{color:var(--text-muted);font-weight:400}
+  .card-dist{display:flex;align-items:center;gap:3px;color:var(--text-muted)}
+  .card-specialities{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.65rem}
+  .spec-tag{background:var(--warm-white);border:1px solid var(--border-light);border-radius:6px;padding:2px 7px;font-size:10px;color:var(--text-muted)}
+  .card-footer{padding:.75rem 1.1rem;border-top:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between}
+  .card-book-btn{
+    background:var(--gold);color:var(--black);border:none;
+    padding:.45rem .9rem;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;gap:4px;transition:.15s;
+  }
+  .card-book-btn:hover{background:var(--gold-light)}
+  .card-book-btn:disabled{background:#e0d8c8;color:#999;cursor:not-allowed}
+  .card-price{font-size:11px;color:var(--text-muted)}
+  .card-price strong{color:var(--text-primary);font-weight:600}
+
+  /* Map strip */
+  .map-section{background:var(--black);padding:3rem 1.5rem}
+  .map-inner{max-width:1100px;margin:0 auto}
+  .map-hd{text-align:center;margin-bottom:2rem}
+  .map-hd h2{font-family:'Playfair Display',serif;color:#fff;font-size:1.8rem;margin-bottom:.4rem}
+  .map-hd p{color:#666;font-size:13px}
+  .map-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  @media(max-width:700px){.map-grid{grid-template-columns:1fr}}
+  .map-area-card{
+    background:#111;border:1px solid #222;border-radius:12px;padding:1.25rem;
+    display:flex;align-items:center;gap:1rem;cursor:pointer;transition:.2s;
+  }
+  .map-area-card:hover{border-color:var(--gold-dark);background:#141414}
+  .map-area-icon{width:44px;height:44px;border-radius:10px;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:20px;flex-shrink:0}
+  .map-area-name{color:#ddd;font-weight:600;font-size:14px;margin-bottom:2px}
+  .map-area-count{font-size:11px;color:#555}
+
+  /* Booking modal */
+  .modal-bg{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:800;
+    display:none;align-items:flex-end;justify-content:center;
+    padding:1rem;
+  }
+  .modal-bg.open{display:flex}
+  @media(min-width:600px){.modal-bg{align-items:center}}
+  .booking-modal{
+    background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:520px;
+    max-height:92vh;overflow-y:auto;
+  }
+  @media(min-width:600px){.booking-modal{border-radius:18px}}
+  .bm-header{
+    padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;background:#fff;z-index:1;
+  }
+  .bm-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+  .bm-close{background:transparent;border:none;font-size:22px;cursor:pointer;color:var(--text-muted);display:flex;align-items:center}
+  .bm-close:hover{color:var(--text-primary)}
+  .bm-salon-info{background:var(--warm-white);border-bottom:1px solid var(--border);padding:1rem 1.5rem;display:flex;align-items:center;gap:.75rem}
+  .bm-salon-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:600}
+  .bm-salon-meta{font-size:12px;color:var(--text-muted)}
+  .bm-body{padding:1.25rem 1.5rem}
+  .bm-field{margin-bottom:1rem}
+  .bm-field label{display:block;font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--text-muted);margin-bottom:.35rem;font-weight:600}
+  .bm-field input,.bm-field select{
+    width:100%;border:1.5px solid var(--border);background:#fff;
+    border-radius:8px;padding:.6rem .9rem;font-size:14px;color:var(--text-primary);
+    outline:none;transition:border-color .2s;
+  }
+  .bm-field input:focus,.bm-field select:focus{border-color:var(--gold-dark)}
+  .bm-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+  .bm-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.75rem;justify-content:flex-end;position:sticky;bottom:0;background:#fff}
+  .bm-cancel{background:transparent;border:1.5px solid var(--border);color:var(--text-muted);padding:.6rem 1.25rem;border-radius:8px;cursor:pointer;font-size:14px}
+  .bm-cancel:hover{border-color:var(--text-muted)}
+  .bm-submit{
+    background:var(--gold);color:var(--black);border:none;
+    padding:.6rem 1.5rem;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;gap:6px;transition:.15s;flex:1;justify-content:center;
+  }
+  .bm-submit:hover{background:var(--gold-light)}
+  .bm-submit:disabled{background:#e0d8c8;color:#999;cursor:not-allowed}
+  .bm-error{background:#FDEDEC;border:1px solid #F0BABA;color:var(--danger);font-size:12px;border-radius:7px;padding:.6rem .85rem;margin-bottom:.75rem;display:none;align-items:center;gap:.5rem}
+  .bm-error.show{display:flex}
+  .bm-success{text-align:center;padding:2rem 1.5rem}
+  .bm-success-icon{font-size:3rem;color:var(--success);margin-bottom:1rem}
+  .bm-success-h{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;margin-bottom:.5rem}
+  .bm-success-p{font-size:13px;color:var(--text-muted);line-height:1.6}
+  .bm-ref{background:var(--warm-white);border-radius:8px;padding:.75rem 1rem;margin:.75rem 0;font-family:'Courier New',monospace;font-size:14px;color:var(--gold-dark);font-weight:700;text-align:center;border:1px solid var(--border)}
+
+  /* Toast */
+  .toast{
+    position:fixed;bottom:1.25rem;left:50%;transform:translateX(-50%) translateY(60px);
+    background:var(--black);color:var(--gold-light);padding:.75rem 1.5rem;border-radius:10px;
+    border:1px solid var(--gold-dark);font-size:13px;z-index:9000;
+    transition:transform .3s;pointer-events:none;display:flex;align-items:center;gap:.5rem;
+    white-space:nowrap;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0)}
+
+  /* Footer */
+  .site-footer{background:var(--black);border-top:1px solid #1a1a1a;padding:2rem 1.5rem;text-align:center}
+  .footer-logo{font-family:'Playfair Display',serif;font-size:18px;color:var(--gold-light);letter-spacing:2px;margin-bottom:.5rem}
+  .footer-sub{font-size:12px;color:#444;margin-bottom:1.5rem}
+  .footer-links{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1rem}
+  .footer-links a{font-size:12px;color:#555;transition:.15s}
+  .footer-links a:hover{color:var(--gold)}
+  .footer-copy{font-size:11px;color:#333}
+
+  /* ─── ADMIN SHELL ─── */
+  #view-admin{height:calc(100vh - 56px);margin-top:56px;flex-direction:row;overflow:hidden}
+
+  /* Login overlay */
+  #adminLogin{
+    position:absolute;inset:0;background:rgba(10,10,10,.97);
+    display:flex;align-items:center;justify-content:center;z-index:200;
+    padding:1rem;
+  }
+  #adminLogin.hidden{display:none}
+  .login-box{
+    background:var(--off-black);border:1px solid var(--gold-dark);
+    border-radius:14px;padding:2.5rem 2rem;width:100%;max-width:360px;
+    box-shadow:0 20px 60px rgba(0,0,0,.7);
+  }
+  .login-logo{font-family:'Playfair Display',serif;font-size:20px;color:var(--gold-light);letter-spacing:2px;text-align:center;margin-bottom:.2rem}
+  .login-sub{text-align:center;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#444;margin-bottom:1.75rem}
+  .login-hint{text-align:center;font-size:11px;color:#4a7c59;background:rgba(39,174,96,.08);border:1px solid rgba(39,174,96,.2);border-radius:7px;padding:.5rem .75rem;margin-bottom:1.25rem}
+  .lf-label{font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:#555;display:block;margin-bottom:.35rem}
+  .lf-input{
+    width:100%;background:#111;border:1px solid #2a2a2a;color:#ddd;
+    border-radius:7px;padding:.6rem .85rem;font-size:14px;outline:none;
+    transition:border-color .2s;margin-bottom:.85rem;
+  }
+  .lf-input:focus{border-color:var(--gold-dark)}
+  .lf-input::placeholder{color:#333}
+  .login-btn{
+    width:100%;background:var(--gold);color:var(--black);border:none;
+    border-radius:8px;padding:.75rem;font-size:14px;font-weight:700;cursor:pointer;
+    font-family:'Playfair Display',serif;letter-spacing:.5px;transition:.15s;margin-top:.25rem;
+  }
+  .login-btn:hover{background:var(--gold-light)}
+  .login-error{
+    background:var(--danger-light);border:1px solid #F0BABA;color:var(--danger);
+    font-size:12px;border-radius:6px;padding:.6rem .85rem;margin-top:.75rem;
+    display:none;align-items:center;gap:.5rem;
+  }
+  .login-error.show{display:flex}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+  /* Admin sidebar */
+  .sidebar{
+    width:var(--sidebar);background:var(--black);
+    border-right:1px solid #1e1e1e;
+    display:flex;flex-direction:column;
+    flex-shrink:0;height:100%;overflow-y:auto;
+  }
+  .sb-logo{
+    padding:1.1rem 1.25rem .9rem;
+    border-bottom:1px solid #1a1a1a;
+    font-family:'Playfair Display',serif;font-size:15px;
+    color:var(--gold-light);letter-spacing:2px;
+  }
+  .sb-logo small{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#333;margin-top:2px;font-family:'Inter',sans-serif}
+  .sb-section{padding:.4rem 0}
+  .sb-label{padding:.35rem 1.25rem;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#333}
+  .sb-item{
+    display:flex;align-items:center;gap:.6rem;
+    padding:.55rem 1.25rem;font-size:12.5px;color:#666;
+    cursor:pointer;transition:.15s;border-left:2px solid transparent;
+  }
+  .sb-item i{font-size:16px;flex-shrink:0}
+  .sb-item:hover{color:#bbb;background:#0c0c0c}
+  .sb-item.active{color:var(--gold);border-left-color:var(--gold);background:#0c0c0c}
+  .sb-item .sb-badge{
+    margin-left:auto;background:var(--gold);color:var(--black);
+    font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;
+  }
+  .sb-divider{border:none;border-top:1px solid #181818;margin:.35rem 0}
+  .sb-bottom{margin-top:auto;padding:.85rem 1.25rem;border-top:1px solid #1a1a1a}
+  .sb-admin-chip{
+    display:flex;align-items:center;gap:.5rem;margin-bottom:.65rem;
+    background:#0c0c0c;border:1px solid #1e1e1e;border-radius:8px;padding:.45rem .75rem;
+  }
+  .sb-avatar{width:26px;height:26px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--black);font-weight:700;flex-shrink:0}
+  .sb-admin-name{font-size:12px;color:#bbb;font-weight:500}
+  .sb-admin-role{font-size:10px;color:#444}
+  .sb-logout{
+    width:100%;background:transparent;border:1px solid #1e1e1e;color:#555;
+    border-radius:6px;padding:.45rem;font-size:12px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:5px;transition:.15s;
+  }
+  .sb-logout:hover{border-color:var(--danger);color:var(--danger)}
+
+  /* Admin main */
+  .admin-main{flex:1;overflow-y:auto;background:#F8F5F0;display:flex;flex-direction:column}
+  .admin-topbar{
+    background:#fff;border-bottom:1px solid var(--border);
+    padding:.7rem 1.5rem;display:flex;align-items:center;
+    justify-content:space-between;position:sticky;top:0;z-index:10;flex-shrink:0;
+  }
+  .topbar-left{display:flex;flex-direction:column}
+  .topbar-page{font-family:'Playfair Display',serif;font-size:17px;font-weight:600}
+  .topbar-crumb{font-size:11px;color:var(--text-muted);margin-top:1px}
+  .topbar-right{display:flex;align-items:center;gap:.6rem}
+  .topbar-btn{
+    background:var(--gold);color:var(--black);border:none;
+    padding:.45rem .9rem;border-radius:6px;font-size:12px;font-weight:600;
+    cursor:pointer;display:flex;align-items:center;gap:4px;transition:.15s;
+  }
+  .topbar-btn:hover{background:var(--gold-light)}
+  .topbar-btn.sec{background:transparent;border:1px solid var(--border);color:var(--text-muted)}
+  .topbar-btn.sec:hover{border-color:var(--gold-dark);color:var(--gold-dark)}
+  .session-chip{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+  .session-chip i{font-size:13px;color:var(--success)}
+
+  .page{display:none;padding:1.5rem;flex:1}
+  .page.active{display:block}
+
+  /* Stats */
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.85rem;margin-bottom:1.25rem}
+  @media(max-width:900px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:500px){.stat-grid{grid-template-columns:1fr 1fr}}
+  .stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.25rem;position:relative;overflow:hidden}
+  .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold)}
+  .stat-card.danger::before{background:var(--danger)}
+  .stat-card.success::before{background:var(--success)}
+  .stat-card.warn::before{background:var(--warn)}
+  .stat-num{font-size:26px;font-weight:700;font-family:'Playfair Display',serif}
+  .stat-label{font-size:11px;color:var(--text-muted);margin-top:.2rem}
+  .stat-delta{font-size:11px;margin-top:.4rem;display:flex;align-items:center;gap:3px}
+  .stat-delta.up{color:var(--success)}
+  .stat-delta.down{color:var(--danger)}
+  .stat-icon{position:absolute;right:.85rem;top:50%;transform:translateY(-50%);font-size:28px;opacity:.06}
+
+  /* Section headers */
+  .sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;flex-wrap:wrap;gap:.5rem}
+  .sec-hd h3{font-family:'Playfair Display',serif;font-size:15px;font-weight:600}
+  .sec-hd-actions{display:flex;gap:.4rem}
+
+  /* Tables */
+  .table-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;overflow-x:auto}
+  .admin-table{width:100%;border-collapse:collapse;min-width:500px}
+  .admin-table th{background:var(--warm-white);padding:.65rem .9rem;text-align:left;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);font-weight:600;white-space:nowrap}
+  .admin-table td{padding:.65rem .9rem;font-size:12.5px;border-bottom:1px solid var(--border-light);vertical-align:middle}
+  .admin-table tr:last-child td{border-bottom:none}
+  .admin-table tr:hover td{background:#FAFAF8}
+  .td-name{font-weight:600;font-family:'Playfair Display',serif;font-size:13px}
+  .td-sub{font-size:11px;color:var(--text-muted)}
+  .pill{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;letter-spacing:.3px}
+  .pill-bridal{background:#FAF0E6;color:#8B5E3C;border:1px solid #E8CFA8}
+  .pill-luxury{background:#F0EFF8;color:#534AB7;border:1px solid #CECBF6}
+  .pill-premium{background:#F0F7EE;color:#3B6D11;border:1px solid #C0DD97}
+  .pill-open{background:#EAFAF1;color:var(--success);border:1px solid #A9DFBF}
+  .pill-closed{background:#FDEDEC;color:var(--danger);border:1px solid #F0BABA}
+  .pill-confirmed{background:#EAFAF1;color:var(--success);border:1px solid #A9DFBF}
+  .pill-cancelled{background:#FDEDEC;color:var(--danger);border:1px solid #F0BABA}
+  .rating-star{color:var(--gold);font-size:11px}
+  .tbl-actions{display:flex;gap:.3rem;flex-wrap:nowrap}
+  .tbl-btn{border:1px solid var(--border);background:transparent;padding:3px 8px;border-radius:5px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:3px;font-family:'Inter',sans-serif;transition:.15s;color:var(--text-muted);white-space:nowrap}
+  .tbl-btn:hover{border-color:var(--gold-dark);color:var(--gold-dark)}
+  .tbl-btn.d:hover{border-color:var(--danger);color:var(--danger)}
+
+  /* Form modal */
+  .form-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:700;display:none;align-items:center;justify-content:center;padding:1rem}
+  .form-bg.open{display:flex}
+  .form-modal{background:#fff;border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+  .fm-header{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1}
+  .fm-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:600}
+  .fm-close{background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);display:flex}
+  .fm-close:hover{color:var(--text-primary)}
+  .fm-body{padding:1.1rem 1.4rem}
+  .fm-field{margin-bottom:.85rem}
+  .fm-field label{display:block;font-size:11px;letter-spacing:.7px;text-transform:uppercase;color:var(--text-muted);margin-bottom:.3rem;font-weight:500}
+  .fm-field input,.fm-field select,.fm-field textarea{width:100%;border:1.5px solid var(--border);background:var(--warm-white);border-radius:7px;padding:.5rem .8rem;font-size:13px;color:var(--text-primary);outline:none;transition:border-color .2s}
+  .fm-field input:focus,.fm-field select:focus,.fm-field textarea:focus{border-color:var(--gold-dark)}
+  .fm-field textarea{resize:vertical;min-height:70px}
+  .fm-row{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+  .fm-footer{padding:.9rem 1.4rem;border-top:1px solid var(--border);display:flex;gap:.65rem;justify-content:flex-end;background:#fff;position:sticky;bottom:0}
+  .fm-cancel{background:transparent;border:1px solid var(--border);color:var(--text-muted);padding:.55rem 1.1rem;border-radius:7px;cursor:pointer;font-size:13px}
+  .fm-cancel:hover{border-color:var(--text-muted)}
+  .fm-save{background:var(--gold);color:var(--black);border:none;padding:.55rem 1.25rem;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:4px}
+  .fm-save:hover{background:var(--gold-light)}
+
+  /* Confirm dialog */
+  .confirm-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;display:none;align-items:center;justify-content:center;padding:1rem}
+  .confirm-bg.open{display:flex}
+  .confirm-box{background:#fff;border-radius:12px;padding:1.5rem;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+  .confirm-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;margin-bottom:.4rem}
+  .confirm-msg{font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:1.1rem}
+  .confirm-actions{display:flex;gap:.65rem;justify-content:flex-end}
+  .confirm-cancel{background:transparent;border:1px solid var(--border);padding:.5rem .9rem;border-radius:7px;cursor:pointer;font-size:13px}
+  .confirm-ok{background:var(--danger);color:#fff;border:none;padding:.5rem .9rem;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600}
+  .confirm-ok:hover{background:#A93226}
+
+  /* Admin toast */
+  .admin-toast{position:fixed;top:1rem;right:1rem;background:var(--black);color:var(--gold-light);padding:.7rem 1.1rem;border-radius:8px;border:1px solid var(--gold-dark);font-size:13px;z-index:9100;opacity:0;transition:opacity .25s;pointer-events:none;display:flex;align-items:center;gap:.5rem}
+  .admin-toast.show{opacity:1}
+
+  /* Security log */
+  .sec-log{background:#0A0A0A;border-radius:8px;padding:.85rem;font-family:'Courier New',monospace;font-size:11px;max-height:260px;overflow-y:auto;border:1px solid #1a1a1a}
+  .sl-line{padding:.15rem 0;border-bottom:1px solid #0f0f0f;display:flex;gap:.6rem}
+  .sl-time{color:#3a3a3a;flex-shrink:0;white-space:nowrap}
+  .sl-msg{color:#777}
+  .sl-msg.warn{color:var(--warn)}
+  .sl-msg.danger{color:#e07070}
+  .sl-msg.success{color:#7ec8a4}
+  .sl-msg.info{color:#7ab8e0}
+
+  /* Charts */
+  .chart-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1rem}
+  .chart-title{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:.65rem}
+  .mini-bar-chart{display:flex;align-items:flex-end;gap:4px;height:50px;padding-top:5px}
+  .mini-bar{flex:1;background:var(--gold);border-radius:3px 3px 0 0;opacity:.7;min-height:4px}
+  .mini-bar:hover{opacity:1}
+  .mini-bar-lbl{font-size:9px;color:var(--text-muted);text-align:center;margin-top:3px}
+
+  /* Toggle switch */
+  .toggle{position:relative;width:34px;height:19px;flex-shrink:0}
+  .toggle input{opacity:0;width:0;height:0}
+  .toggle-slider{position:absolute;inset:0;background:#ccc;border-radius:19px;cursor:pointer;transition:.25s}
+  .toggle-slider:before{content:'';position:absolute;width:13px;height:13px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.25s}
+  .toggle input:checked+.toggle-slider{background:var(--gold)}
+  .toggle input:checked+.toggle-slider:before{transform:translateX(15px)}
+
+  /* Admin alert */
+  .admin-alert{display:flex;align-items:flex-start;gap:.65rem;padding:.8rem .9rem;border-radius:8px;margin-bottom:.75rem;font-size:13px}
+  .admin-alert i{font-size:16px;flex-shrink:0;margin-top:1px}
+  .admin-alert.info{background:#EBF5FB;color:#2471A3;border:1px solid #AED6F1}
+  .admin-alert.warn{background:var(--warn-light);color:var(--warn);border:1px solid #FAD7A0}
+
+  /* ─── MOBILE SIDEBAR TOGGLE ─── */
+  .sb-toggle{display:none;position:fixed;bottom:1rem;left:1rem;z-index:600;width:44px;height:44px;border-radius:12px;background:var(--black);border:1px solid #222;color:var(--gold);font-size:20px;align-items:center;justify-content:center;cursor:pointer}
+  .sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:299;top:56px}
+  .sidebar-backdrop.show{display:block}
+  @media(max-width:680px){
+    .sidebar{position:fixed;top:56px;bottom:0;left:-240px;z-index:300;transition:left .25s;width:220px}
+    .sidebar.open{left:0;box-shadow:4px 0 20px rgba(0,0,0,.4)}
+    .sb-toggle{display:flex}
+    .admin-main{margin-left:0!important}
+    .page{padding:1rem}
+    .stat-grid{grid-template-columns:1fr 1fr}
+    .top-nav-tabs .nav-tab span{display:none}
+    .nav-mybk span{display:none}
+    .nav-mybk{padding:.4rem .55rem}
+  }
+
+  /* Customer mobile */
+  @media(max-width:600px){
+    .hero-h1{font-size:2.4rem}
+    .salons-grid{grid-template-columns:1fr}
+    .filter-bar{padding:.6rem 1rem}
+    .salons-section{padding:1.5rem 1rem}
+  }
+
+  /* ─── LIVE MAP ─── */
+  .map-toolbar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem}
+  .map-pills{display:flex;gap:.4rem;flex-wrap:wrap}
+  .map-pill{
+    padding:.35rem .8rem;border-radius:20px;border:1px solid #2a2a2a;
+    font-size:11.5px;color:#999;cursor:pointer;transition:.15s;background:#111;
+    display:flex;align-items:center;gap:4px;
+  }
+  .map-pill:hover{border-color:var(--gold-dark);color:var(--gold-light)}
+  .map-pill.active{background:var(--gold);color:var(--black);border-color:var(--gold);font-weight:600}
+  .map-locate-btn{
+    background:#111;border:1px solid #2a2a2a;color:var(--gold-light);
+    padding:.4rem .85rem;border-radius:20px;font-size:11.5px;cursor:pointer;
+    display:flex;align-items:center;gap:5px;transition:.15s;white-space:nowrap;
+  }
+  .map-locate-btn:hover{border-color:var(--gold-dark);background:#161616}
+  .map-locate-btn.busy i{animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .leaflet-map-wrap{
+    height:460px;border-radius:14px;overflow:hidden;border:1px solid #222;
+    position:relative;
+  }
+  @media(max-width:600px){.leaflet-map-wrap{height:300px;border-radius:10px}}
+  #salonsLeafletMap{height:100%;width:100%;background:#0c0c0c}
+  .map-legend{
+    display:flex;gap:1.1rem;flex-wrap:wrap;justify-content:center;
+    margin-top:1rem;font-size:11px;color:#666;
+  }
+  .map-legend span{display:flex;align-items:center;gap:5px}
+  .legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .legend-dot.open{background:var(--success)}
+  .legend-dot.closed{background:var(--danger)}
+  .legend-dot.you{background:#4A90D9}
+  .gl-pin{display:flex;align-items:center;justify-content:center}
+  .gl-popup .leaflet-popup-content-wrapper{background:#161412;color:#eee;border-radius:12px;border:1px solid rgba(201,168,76,.35)}
+  .gl-popup .leaflet-popup-tip{background:#161412;border:1px solid rgba(201,168,76,.35)}
+  .gl-popup .leaflet-popup-content{margin:.85rem .9rem;width:210px!important}
+  .gl-pop-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#fff;margin-bottom:2px}
+  .gl-pop-meta{font-size:11px;color:#999;margin-bottom:.6rem;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+  .gl-pop-btn{
+    background:var(--gold);color:var(--black);border:none;width:100%;
+    padding:.4rem;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;
+  }
+  .gl-pop-btn:hover{background:var(--gold-light)}
+
+  /* ─── SALON DETAIL MODAL ─── */
+  .dm-hero{height:150px;background:linear-gradient(135deg,#1a1a1a,#2a2219);position:relative;display:flex;align-items:center;justify-content:center;font-size:3.2rem}
+  .dm-hero-pattern{position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(201,168,76,.05) 0px,rgba(201,168,76,.05) 1px,transparent 1px,transparent 12px)}
+  .dm-body{padding:1.25rem 1.5rem}
+  .dm-name-row{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;margin-bottom:.3rem}
+  .dm-name{font-family:'Playfair Display',serif;font-size:19px;font-weight:700}
+  .dm-meta-row{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;font-size:12.5px;color:var(--text-muted);margin-bottom:1rem}
+  .dm-meta-row i{font-size:13px;margin-right:2px}
+  .dm-sec-title{font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--text-muted);font-weight:700;margin:1.1rem 0 .6rem}
+  .dm-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem .9rem;font-size:12.5px;color:var(--text-primary);margin-bottom:.25rem}
+  .dm-info-grid div{display:flex;align-items:flex-start;gap:6px}
+  .dm-info-grid i{color:var(--gold-dark);margin-top:1px}
+  .dm-svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+  .dm-svc-card{background:var(--warm-white);border:1px solid var(--border-light);border-radius:8px;padding:.6rem .75rem}
+  .dm-svc-name{font-size:12px;font-weight:600;margin-bottom:1px}
+  .dm-svc-price{font-size:12px;color:var(--gold-dark);font-weight:700}
+  .dm-review{padding:.7rem 0;border-bottom:1px solid var(--border-light)}
+  .dm-review:last-child{border-bottom:none}
+  .dm-review-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.2rem}
+  .dm-review-name{font-size:12.5px;font-weight:600}
+  .dm-review-date{font-size:10.5px;color:var(--text-light)}
+  .dm-review-stars{color:var(--gold);font-size:11px;margin-bottom:.25rem}
+  .dm-review-text{font-size:12px;color:var(--text-muted);line-height:1.55}
+  .dm-empty{font-size:12px;color:var(--text-light);font-style:italic}
+  .dm-directions{background:var(--warm-white);border:1px solid var(--border);border-radius:10px;padding:.85rem;margin-top:.25rem;display:none}
+  .dm-directions.show{display:block}
+  .dm-directions-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+  .dm-directions-txt{font-size:12px;color:var(--text-muted)}
+  .dm-directions-btn{background:var(--black);color:var(--gold-light);border:none;padding:.45rem .85rem;border-radius:7px;font-size:11.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap}
+  .dm-directions-btn:hover{background:#222}
+  .dm-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.75rem;position:sticky;bottom:0;background:#fff}
+  .dm-dir-link{flex:1;background:transparent;border:1.5px solid var(--border);color:var(--text-primary);padding:.6rem 1rem;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+  .dm-dir-link:hover{border-color:var(--gold-dark);color:var(--gold-dark)}
+  .dm-book-link{flex:1.4;background:var(--gold);color:var(--black);border:none;padding:.6rem 1rem;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+  .dm-book-link:hover{background:var(--gold-light)}
+  .dm-book-link:disabled{background:#e0d8c8;color:#999;cursor:not-allowed}
+
+  /* ─── MY BOOKINGS MODAL ─── */
+  .nav-mybk{
+    background:transparent;border:1px solid rgba(201,168,76,.3);color:var(--gold-light);
+    padding:.4rem .75rem;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;
+    display:flex;align-items:center;gap:5px;transition:.15s;position:relative;
+  }
+  .nav-mybk:hover{background:rgba(201,168,76,.1)}
+  .nav-mybk-badge{background:var(--gold);color:var(--black);font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px}
+  .mybk-item{background:var(--warm-white);border:1px solid var(--border-light);border-radius:10px;padding:.85rem 1rem;margin-bottom:.65rem}
+  .mybk-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.3rem;gap:.5rem}
+  .mybk-salon{font-family:'Playfair Display',serif;font-weight:700;font-size:14px}
+  .mybk-meta{font-size:11.5px;color:var(--text-muted);line-height:1.6}
+  .mybk-cancel{background:transparent;border:1px solid var(--border);color:var(--danger);padding:.3rem .65rem;border-radius:6px;font-size:11px;cursor:pointer;margin-top:.5rem}
+  .mybk-cancel:hover{background:var(--danger-light)}
+
+  /* ─── AI ASSISTANT ─── */
+  .ai-fab{
+    position:fixed;bottom:1.5rem;right:1.5rem;z-index:850;
+    width:56px;height:56px;border-radius:50%;background:var(--gold);
+    color:var(--black);border:none;cursor:pointer;font-size:24px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 24px rgba(201,168,76,.45);transition:.2s;
+  }
+  .ai-fab:hover{transform:scale(1.06);background:var(--gold-light)}
+  .ai-fab.hide{display:none}
+  .ai-panel{
+    position:fixed;bottom:1.5rem;right:1.5rem;z-index:860;
+    width:360px;max-width:calc(100vw - 2rem);height:520px;max-height:calc(100vh - 3rem);
+    background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.35);
+    display:none;flex-direction:column;overflow:hidden;border:1px solid var(--border);
+  }
+  .ai-panel.open{display:flex}
+  .ai-header{background:var(--black);color:#fff;padding:.9rem 1.1rem;display:flex;align-items:center;justify-content:space-between}
+  .ai-header-left{display:flex;align-items:center;gap:.6rem}
+  .ai-avatar{width:32px;height:32px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;color:var(--black);font-size:16px}
+  .ai-header-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--gold-light)}
+  .ai-header-sub{font-size:10px;color:#777}
+  .ai-close{background:transparent;border:none;color:#888;font-size:18px;cursor:pointer}
+  .ai-close:hover{color:#fff}
+  .ai-messages{flex:1;overflow-y:auto;padding:1rem;background:var(--warm-white);display:flex;flex-direction:column;gap:.65rem}
+  .ai-msg{max-width:84%;padding:.55rem .8rem;border-radius:12px;font-size:13px;line-height:1.5}
+  .ai-msg.bot{background:#fff;border:1px solid var(--border-light);align-self:flex-start;border-bottom-left-radius:3px}
+  .ai-msg.user{background:var(--gold);color:var(--black);align-self:flex-end;border-bottom-right-radius:3px;font-weight:500}
+  .ai-msg.typing{display:flex;gap:4px;align-items:center;padding:.7rem .9rem}
+  .ai-dot{width:6px;height:6px;border-radius:50%;background:#bbb;animation:aiDot 1.2s infinite}
+  .ai-dot:nth-child(2){animation-delay:.2s}
+  .ai-dot:nth-child(3){animation-delay:.4s}
+  @keyframes aiDot{0%,60%,100%{opacity:.3}30%{opacity:1}}
+  .ai-input-row{padding:.75rem;border-top:1px solid var(--border);display:flex;gap:.5rem;background:#fff}
+  .ai-input-row input{flex:1;border:1.5px solid var(--border);border-radius:20px;padding:.55rem 1rem;font-size:13px;outline:none}
+  .ai-input-row input:focus{border-color:var(--gold-dark)}
+  .ai-send{background:var(--gold);color:var(--black);border:none;width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .ai-send:hover{background:var(--gold-light)}
+  .ai-key-notice{font-size:10.5px;color:var(--text-light);text-align:center;padding:.4rem 0 0}
+  @media(max-width:480px){.ai-panel{right:.5rem;bottom:.5rem;width:calc(100vw - 1rem)}.ai-fab{right:1rem;bottom:1rem}}
+
+  /* ─── PWA BANNER ─── */
+  .pwa-banner{
+    position:fixed;left:1rem;right:1rem;bottom:1rem;z-index:840;
+    max-width:480px;margin:0 auto;background:var(--black);color:#fff;
+    border:1px solid rgba(201,168,76,.35);border-radius:14px;
+    padding:.85rem 1rem;display:none;align-items:center;gap:.85rem;
+    box-shadow:0 12px 40px rgba(0,0,0,.4);
+  }
+  .pwa-banner.show{display:flex}
+  .pwa-icon{width:42px;height:42px;border-radius:10px;background:var(--gold);color:var(--black);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .pwa-text{flex:1}
+  .pwa-text-h{font-size:13px;font-weight:700;color:var(--gold-light)}
+  .pwa-text-p{font-size:11px;color:#888}
+  .pwa-actions{display:flex;gap:.4rem;flex-shrink:0}
+  .pwa-install{background:var(--gold);color:var(--black);border:none;padding:.4rem .8rem;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer}
+  .pwa-install:hover{background:var(--gold-light)}
+  .pwa-dismiss{background:transparent;border:none;color:#666;font-size:18px;cursor:pointer;padding:0 .2rem}
+  .pwa-dismiss:hover{color:#aaa}
+  </style>
+</head>
+<body>
+
+<!-- ─── TOP NAV ─── -->
+<nav class="top-nav">
+  <div class="top-nav-logo" onclick="switchView('customer')">Glamoura</div>
+  <div class="top-nav-tabs">
+    <div class="nav-tab active" id="tab-customer" onclick="switchView('customer')">
+      <i class="ti ti-sparkles"></i><span>Discover</span>
+    </div>
+    <div class="nav-tab" id="tab-admin" onclick="switchView('admin')">
+      <i class="ti ti-layout-dashboard"></i><span>Admin</span>
+    </div>
+  </div>
+  <div class="top-nav-right">
+    <button class="nav-mybk" onclick="openMyBookings()"><i class="ti ti-ticket" style="font-size:14px"></i> <span>My Bookings</span><span class="nav-mybk-badge" id="navMyBkBadge" style="display:none">0</span></button>
+    <button class="nav-cta" onclick="openBookingFromNav()"><i class="ti ti-calendar-plus" style="font-size:14px"></i> Book Now</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     CUSTOMER VIEW
+═══════════════════════════════════════════════ -->
+<div id="view-customer">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-orb"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">✦ Delhi's Premier Salon Marketplace</div>
+      <h1 class="hero-h1">Beauty <em>Redefined</em><br>in Every Borough</h1>
+      <p class="hero-sub">Discover, compare and book top luxury salons across South Delhi, Central Delhi and East Delhi. Bridal packages, hair transformations, and more.</p>
+      <div class="hero-search">
+        <input type="text" id="heroSearch" placeholder="Search salons, services, areas..." oninput="heroFilter(this.value)" onkeydown="if(event.key==='Enter')heroFilter(this.value)">
+        <button class="hero-search-btn" onclick="heroFilter(document.getElementById('heroSearch').value)"><i class="ti ti-search"></i> Search</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-num" id="heroStatSalons">12</div><div class="hero-stat-lbl">Partner Salons</div></div>
+        <div class="hero-stat"><div class="hero-stat-num" id="heroStatOpen">—</div><div class="hero-stat-lbl">Open Now</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-lbl">Areas Covered</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">4.5★</div><div class="hero-stat-lbl">Avg Rating</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-lbl"><i class="ti ti-filter" style="font-size:13px"></i></div>
+    <div class="filter-chip active" onclick="setFilter('all',this)"><i class="ti ti-list"></i> All</div>
+    <div class="filter-chip" onclick="setFilter('open',this)"><i class="ti ti-door-enter"></i> Open Now</div>
+    <div class="filter-chip" onclick="setFilter('South Delhi',this)"><i class="ti ti-map-pin"></i> South Delhi</div>
+    <div class="filter-chip" onclick="setFilter('Central Delhi',this)"><i class="ti ti-map-pin"></i> Central Delhi</div>
+    <div class="filter-chip" onclick="setFilter('East Delhi',this)"><i class="ti ti-map-pin"></i> East Delhi</div>
+    <div class="filter-chip" onclick="setFilter('bridal',this)">💍 Bridal</div>
+    <div class="filter-chip" onclick="setFilter('luxury',this)">✦ Luxury</div>
+    <div class="filter-chip" onclick="setFilter('premium',this)">⭐ Premium</div>
+  </div>
+
+  <!-- Salons Grid -->
+  <section class="salons-section">
+    <div class="section-hd">
+      <h2>Featured Salons</h2>
+      <span id="salonCountLabel">Showing 12 salons</span>
+    </div>
+    <div class="salons-grid" id="salonsGrid"></div>
+  </section>
+
+  <!-- Map / Areas Section -->
+  <section class="map-section">
+    <div class="map-inner">
+      <div class="map-hd">
+        <h2>Explore by Area</h2>
+        <p>Tap a pin to preview a salon, or filter by area below</p>
+      </div>
+
+      <div class="map-toolbar">
+        <div class="map-pills" id="mapPills">
+          <div class="map-pill active" onclick="setMapArea('all',this)">All Areas</div>
+          <div class="map-pill" onclick="setMapArea('South Delhi',this)">South Delhi</div>
+          <div class="map-pill" onclick="setMapArea('Central Delhi',this)">Central Delhi</div>
+          <div class="map-pill" onclick="setMapArea('East Delhi',this)">East Delhi</div>
+        </div>
+        <button class="map-locate-btn" id="locateBtn" onclick="locateMe()"><i class="ti ti-current-location"></i> My Location</button>
+      </div>
+
+      <div class="leaflet-map-wrap">
+        <div id="salonsLeafletMap"></div>
+      </div>
+
+      <div class="map-legend">
+        <span><i class="legend-dot open"></i> Open now</span>
+        <span><i class="legend-dot closed"></i> Closed</span>
+        <span><i class="legend-dot you"></i> Your location</span>
+      </div>
+
+      <div class="map-grid" style="margin-top:2rem">
+        <div class="map-area-card" onclick="setFilterFromMap('South Delhi')">
+          <div class="map-area-icon"><i class="ti ti-map-pin"></i></div>
+          <div><div class="map-area-name">South Delhi</div><div class="map-area-count" id="areaSouth">— salons</div></div>
+        </div>
+        <div class="map-area-card" onclick="setFilterFromMap('Central Delhi')">
+          <div class="map-area-icon"><i class="ti ti-building"></i></div>
+          <div><div class="map-area-name">Central Delhi</div><div class="map-area-count" id="areaCentral">— salons</div></div>
+        </div>
+        <div class="map-area-card" onclick="setFilterFromMap('East Delhi')">
+          <div class="map-area-icon"><i class="ti ti-compass"></i></div>
+          <div><div class="map-area-name">East Delhi</div><div class="map-area-count" id="areaEast">— salons</div></div>
+        </div>
+        <div class="map-area-card" onclick="setFilter('open',document.querySelector('.filter-chip:nth-child(3)'));switchToCustomer()">
+          <div class="map-area-icon"><i class="ti ti-clock"></i></div>
+          <div><div class="map-area-name">Open Right Now</div><div class="map-area-count" id="areaOpen">— salons</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-logo">Glamoura</div>
+    <div class="footer-sub">Delhi's Premier Luxury Salon Marketplace</div>
+    <div class="footer-links">
+      <a href="#">About</a>
+      <a href="#">For Salons</a>
+      <a href="#">Careers</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+    </div>
+    <div class="footer-copy">© 2026 Glamoura. Built with ♥ for Delhi's beauty community.</div>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     ADMIN VIEW
+═══════════════════════════════════════════════ -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+<div id="view-admin">
+
+  <!-- Login Overlay -->
+  <div id="adminLogin">
+    <div class="login-box">
+      <div class="login-logo">Glamoura</div>
+      <div class="login-sub">Admin Console · Secure Access</div>
+      <div class="login-hint"><i class="ti ti-info-circle"></i> Demo: <strong>admin</strong> / <strong>admin</strong></div>
+      <label class="lf-label">Username</label>
+      <input class="lf-input" type="text" id="aUser" placeholder="admin" autocomplete="off" onkeydown="if(event.key==='Enter')doAdminLogin()">
+      <label class="lf-label">Password</label>
+      <input class="lf-input" type="password" id="aPass" placeholder="••••••" autocomplete="off" onkeydown="if(event.key==='Enter')doAdminLogin()">
+      <button class="login-btn" onclick="doAdminLogin()"><i class="ti ti-shield-lock"></i> &nbsp;Access Admin Panel</button>
+      <div class="login-error" id="loginErr"><i class="ti ti-alert-circle"></i><span id="loginErrMsg">Invalid credentials.</span></div>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="adminSidebar">
+    <div class="sb-logo">Glamoura<small>Admin Console</small></div>
+    <div class="sb-section">
+      <div class="sb-label">Main</div>
+      <div class="sb-item active" onclick="adminNav('dashboard',this)"><i class="ti ti-dashboard"></i>Dashboard</div>
+      <div class="sb-item" onclick="adminNav('salons',this)"><i class="ti ti-scissors"></i>Salons <span class="sb-badge" id="sbSalonCount">12</span></div>
+      <div class="sb-item" onclick="adminNav('bookings',this)"><i class="ti ti-calendar-event"></i>Bookings <span class="sb-badge" id="sbBookingCount">0</span></div>
+    </div>
+    <hr class="sb-divider">
+    <div class="sb-section">
+      <div class="sb-label">Content</div>
+      <div class="sb-item" onclick="adminNav('reviews',this)"><i class="ti ti-message-circle"></i>Reviews</div>
+      <div class="sb-item" onclick="adminNav('promotions',this)"><i class="ti ti-discount"></i>Promotions</div>
+      <div class="sb-item" onclick="adminNav('banners',this)"><i class="ti ti-photo"></i>Banners</div>
+    </div>
+    <hr class="sb-divider">
+    <div class="sb-section">
+      <div class="sb-label">System</div>
+      <div class="sb-item" onclick="adminNav('security',this)"><i class="ti ti-shield"></i>Security Log</div>
+      <div class="sb-item" onclick="adminNav('settings',this)"><i class="ti ti-settings"></i>Settings</div>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-admin-chip">
+        <div class="sb-avatar">A</div>
+        <div><div class="sb-admin-name">Admin</div><div class="sb-admin-role">Super Admin</div></div>
+      </div>
+      <button class="sb-logout" onclick="doAdminLogout()"><i class="ti ti-logout"></i> Sign Out</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="topbar-left">
+        <div class="topbar-page" id="topbarTitle">Dashboard</div>
+        <div class="topbar-crumb" id="topbarCrumb">Admin / Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <div class="session-chip"><i class="ti ti-lock"></i><span id="sessionTimer">00:00</span></div>
+        <button class="topbar-btn sec" onclick="adminNav('security',null)"><i class="ti ti-shield"></i></button>
+        <button class="topbar-btn" onclick="openAddSalon()"><i class="ti ti-plus"></i> Add Salon</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD PAGE -->
+    <div class="page active" id="apage-dashboard">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="dsh-salons">12</div>
+          <div class="stat-label">Total Salons</div>
+          <div class="stat-delta up"><i class="ti ti-trending-up"></i>+2 this month</div>
+          <i class="ti ti-scissors stat-icon"></i>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-num" id="dsh-open">—</div>
+          <div class="stat-label">Open Right Now</div>
+          <div class="stat-delta up"><i class="ti ti-circle-filled" style="font-size:8px"></i> Live</div>
+          <i class="ti ti-door-enter stat-icon"></i>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="dsh-bookings">0</div>
+          <div class="stat-label">Active Bookings</div>
+          <div class="stat-delta" style="color:var(--text-muted)">Updated live</div>
+          <i class="ti ti-calendar-event stat-icon"></i>
+        </div>
+        <div class="stat-card warn">
+          <div class="stat-num" id="dsh-alerts">0</div>
+          <div class="stat-label">Security Events</div>
+          <div class="stat-delta" style="color:var(--text-muted)">This session</div>
+          <i class="ti ti-shield-exclamation stat-icon"></i>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1.25rem">
+        <div class="chart-wrap">
+          <div class="chart-title">Salons by Area</div>
+          <div class="mini-bar-chart" id="areaChart"></div>
+          <div style="display:flex;gap:.25rem;margin-top:.3rem" id="areaLabels"></div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title">Salons by Badge</div>
+          <div id="badgeBreakdown" style="display:flex;flex-direction:column;gap:.35rem;padding-top:.2rem"></div>
+        </div>
+      </div>
+
+      <div class="sec-hd"><h3>Recent Activity</h3></div>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Time</th><th>Event</th><th>Details</th><th>Status</th></tr></thead>
+          <tbody id="activityTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SALONS PAGE -->
+    <div class="page" id="apage-salons">
+      <div class="sec-hd">
+        <h3>All Salons</h3>
+        <div class="sec-hd-actions">
+          <input type="text" placeholder="Search salons…" oninput="filterAdminSalons(this.value)" style="border:1px solid var(--border);border-radius:6px;padding:.38rem .7rem;font-size:12px;outline:none;width:160px">
+          <button class="topbar-btn" onclick="openAddSalon()"><i class="ti ti-plus"></i> Add Salon</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Salon</th><th>Area</th><th>Badge</th><th>Rating</th><th>Status</th><th>Hours</th><th>Actions</th></tr></thead>
+          <tbody id="salonsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- BOOKINGS PAGE -->
+    <div class="page" id="apage-bookings">
+      <div class="sec-hd">
+        <h3>All Bookings</h3>
+        <div class="sec-hd-actions">
+          <button class="topbar-btn sec" onclick="exportBookings()"><i class="ti ti-download"></i> Export CSV</button>
+        </div>
+      </div>
+      <div id="bookingsEmpty" class="admin-alert info" style="display:none">
+        <i class="ti ti-info-circle"></i>No bookings yet. They appear here when customers book on the main site.
+      </div>
+      <div class="table-wrap" id="bookingsTableWrap">
+        <table class="admin-table">
+          <thead><tr><th>Ref</th><th>Customer</th><th>Salon</th><th>Service</th><th>Date</th><th>Time</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="bookingsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REVIEWS PAGE -->
+    <div class="page" id="apage-reviews">
+      <div class="sec-hd"><h3>Customer Reviews</h3></div>
+      <div id="reviewsList"></div>
+    </div>
+
+    <!-- PROMOTIONS PAGE -->
+    <div class="page" id="apage-promotions">
+      <div class="sec-hd">
+        <h3>Active Promotions</h3>
+        <button class="topbar-btn" onclick="addPromoModal()"><i class="ti ti-plus"></i> New</button>
+      </div>
+      <div id="promotionsList"></div>
+    </div>
+
+    <!-- BANNERS PAGE -->
+    <div class="page" id="apage-banners">
+      <div class="sec-hd"><h3>Site Banners</h3></div>
+      <div class="admin-alert info"><i class="ti ti-info-circle"></i>Banners appear on the customer-facing site. Toggle visibility or update text below.</div>
+      <div id="bannersList"></div>
+    </div>
+
+    <!-- SECURITY PAGE -->
+    <div class="page" id="apage-security">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1.25rem">
+        <div class="stat-card danger">
+          <div class="stat-num" id="sec-failed">0</div>
+          <div class="stat-label">Failed Login Attempts</div>
+          <i class="ti ti-shield-x stat-icon"></i>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-num">1</div>
+          <div class="stat-label">Successful Logins</div>
+          <i class="ti ti-shield-check stat-icon"></i>
+        </div>
+      </div>
+      <div class="sec-hd"><h3>Security Policies</h3></div>
+      <div class="table-wrap" style="margin-bottom:1.25rem">
+        <table class="admin-table">
+          <thead><tr><th>Policy</th><th>Value</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Max login attempts before lockout</td><td><strong>5 attempts</strong></td><td><span class="pill pill-open">Active</span></td></tr>
+            <tr><td>Lockout duration</td><td><strong>5 min (progressive)</strong></td><td><span class="pill pill-open">Active</span></td></tr>
+            <tr><td>Session timeout (inactivity)</td><td><strong>30 minutes</strong></td><td><span class="pill pill-open">Active</span></td></tr>
+            <tr><td>JWT token auth (backend)</td><td><strong>bcrypt + signed JWT</strong></td><td><span class="pill pill-open">Active</span></td></tr>
+            <tr><td>Credentials in source</td><td><strong>None — hashed only</strong></td><td><span class="pill pill-open">Active</span></td></tr>
+            <tr><td>CORS policy</td><td><strong>Allowlisted origins only</strong></td><td><span class="pill pill-open">Active</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sec-hd">
+        <h3>Live Security Log</h3>
+        <button class="topbar-btn sec" onclick="clearSecLog()"><i class="ti ti-trash"></i> Clear</button>
+      </div>
+      <div class="sec-log" id="secLog"></div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div class="page" id="apage-settings">
+      <div class="sec-hd"><h3>Site Settings</h3></div>
+      <div class="table-wrap" style="margin-bottom:1.25rem">
+        <table class="admin-table">
+          <thead><tr><th>Setting</th><th>Description</th><th>Toggle</th></tr></thead>
+          <tbody>
+            <tr><td>AI Assistant</td><td>Glamoura AI booking chat</td><td><label class="toggle"><input type="checkbox" checked onchange="aToast('AI Assistant ' + (this.checked?'enabled':'disabled'))"><span class="toggle-slider"></span></label></td></tr>
+            <tr><td>Booking system</td><td>Allow customers to book appointments</td><td><label class="toggle"><input type="checkbox" checked onchange="aToast('Booking system ' + (this.checked?'enabled':'disabled'))"><span class="toggle-slider"></span></label></td></tr>
+            <tr><td>Open Now filter</td><td>Show live open/closed status</td><td><label class="toggle"><input type="checkbox" checked onchange="aToast('Open Now filter ' + (this.checked?'enabled':'disabled'))"><span class="toggle-slider"></span></label></td></tr>
+            <tr><td>Maintenance mode</td><td>Show maintenance page to customers</td><td><label class="toggle"><input type="checkbox" onchange="aToast('Maintenance mode ' + (this.checked?'ON':'OFF'))"><span class="toggle-slider"></span></label></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sec-hd"><h3>Site Info</h3></div>
+      <div class="table-wrap" style="padding:1.1rem;max-width:500px">
+        <div class="fm-field"><label>Site Name</label><input type="text" value="Glamoura — Delhi Luxury Salon Marketplace"></div>
+        <div class="fm-field"><label>Contact Email</label><input type="email" value="admin@glamoura.in"></div>
+        <div class="fm-field"><label>City</label><input type="text" value="Delhi, India"></div>
+        <div class="fm-field"><label>Support Phone</label><input type="tel" value="+91 98000 00000"></div>
+        <button class="topbar-btn" style="margin-top:.35rem" onclick="aToast('Settings saved ✓')"><i class="ti ti-device-floppy"></i> Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── BOOKING MODAL ─── -->
+<div class="modal-bg" id="bookingModal">
+  <div class="booking-modal" id="bookingModalInner">
+    <div class="bm-header">
+      <div class="bm-title" id="bmTitle">Book Appointment</div>
+      <button class="bm-close" onclick="closeBooking()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="bm-salon-info" id="bmSalonInfo"></div>
+    <div id="bmFormWrap">
+      <div class="bm-body">
+        <div class="bm-error" id="bmError"><i class="ti ti-alert-circle"></i><span id="bmErrorMsg"></span></div>
+        <div class="bm-field">
+          <label>Full Name</label>
+          <input type="text" id="bm-name" placeholder="e.g. Priya Sharma">
+        </div>
+        <div class="bm-field">
+          <label>Phone Number</label>
+          <input type="tel" id="bm-phone" placeholder="+91 98000 00000">
+        </div>
+        <div class="bm-field">
+          <label>Service</label>
+          <select id="bm-service"></select>
+        </div>
+        <div class="bm-row">
+          <div class="bm-field">
+            <label>Date</label>
+            <input type="date" id="bm-date">
+          </div>
+          <div class="bm-field">
+            <label>Time Slot</label>
+            <select id="bm-time">
+              <option value="">Select time</option>
+              <option value="9:00 AM">9:00 AM</option>
+              <option value="10:00 AM">10:00 AM</option>
+              <option value="11:00 AM">11:00 AM</option>
+              <option value="12:00 PM">12:00 PM</option>
+              <option value="1:00 PM">1:00 PM</option>
+              <option value="2:00 PM">2:00 PM</option>
+              <option value="3:00 PM">3:00 PM</option>
+              <option value="4:00 PM">4:00 PM</option>
+              <option value="5:00 PM">5:00 PM</option>
+              <option value="6:00 PM">6:00 PM</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="bm-footer">
+        <button class="bm-cancel" onclick="closeBooking()">Cancel</button>
+        <button class="bm-submit" onclick="submitBooking()"><i class="ti ti-calendar-check"></i> Confirm Booking</button>
+      </div>
+    </div>
+    <div id="bmSuccess" style="display:none">
+      <div class="bm-success">
+        <div class="bm-success-icon"><i class="ti ti-circle-check"></i></div>
+        <div class="bm-success-h">Booking Confirmed!</div>
+        <div class="bm-success-p">Your appointment has been booked successfully.</div>
+        <div class="bm-ref" id="bmRef">BK-XXXXXXX</div>
+        <div class="bm-success-p">A confirmation will be sent to your number. You can view this booking in the Admin dashboard.</div>
+        <button class="bm-submit" style="max-width:200px;margin:1rem auto 0" onclick="closeBooking()">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SALON DETAIL MODAL ─── -->
+<div class="modal-bg" id="detailModal">
+  <div class="booking-modal" id="detailModalInner" style="max-width:560px">
+    <div class="bm-header">
+      <div class="bm-title" id="dmTitle">Salon Details</div>
+      <button class="bm-close" onclick="closeDetail()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="dm-hero" id="dmHero">
+      <div class="dm-hero-pattern"></div>
+      <div id="dmEmoji" style="position:relative">✂️</div>
+    </div>
+    <div class="dm-body">
+      <div class="dm-name-row">
+        <div class="dm-name" id="dmName"></div>
+        <span class="card-open-pill" id="dmOpenPill"><span class="card-open-dot"></span><span id="dmOpenTxt"></span></span>
+      </div>
+      <div class="dm-meta-row">
+        <span><i class="ti ti-star-filled" style="color:var(--gold)"></i><span id="dmRating"></span></span>
+        <span><i class="ti ti-navigation"></i><span id="dmDist"></span></span>
+        <span><i class="ti ti-clock"></i><span id="dmHours"></span></span>
+      </div>
+
+      <div class="dm-info-grid">
+        <div><i class="ti ti-map-pin"></i><span id="dmAddr"></span></div>
+        <div><i class="ti ti-phone"></i><span id="dmPhone"></span></div>
+      </div>
+
+      <div class="dm-directions" id="dmDirections">
+        <div class="dm-directions-row">
+          <div class="dm-directions-txt" id="dmDirectionsTxt">Enable "My Location" on the map for a precise route, or open directions straight away.</div>
+        </div>
+      </div>
+
+      <div class="dm-sec-title">Services &amp; Rates</div>
+      <div class="dm-svc-grid" id="dmServices"></div>
+
+      <div class="dm-sec-title">Customer Reviews</div>
+      <div id="dmReviews"></div>
+    </div>
+    <div class="dm-footer">
+      <button class="dm-dir-link" onclick="getDirections()"><i class="ti ti-map-2"></i> Directions</button>
+      <button class="dm-book-link" id="dmBookBtn" onclick="bookFromDetail()"><i class="ti ti-calendar-plus"></i> Book Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MY BOOKINGS MODAL ─── -->
+<div class="modal-bg" id="myBookingsModal">
+  <div class="booking-modal" id="myBookingsModalInner" style="max-width:460px">
+    <div class="bm-header">
+      <div class="bm-title">My Bookings</div>
+      <button class="bm-close" onclick="closeMyBookings()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="bm-body" id="myBookingsBody" style="min-height:120px"></div>
+  </div>
+</div>
+
+<!-- ─── SALON FORM MODAL ─── -->
+<div class="form-bg" id="salonFormBg">
+  <div class="form-modal">
+    <div class="fm-header">
+      <div class="fm-title" id="sfTitle">Add New Salon</div>
+      <button class="fm-close" onclick="closeSalonForm()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="fm-body">
+      <input type="hidden" id="editSalonId">
+      <div class="fm-row">
+        <div class="fm-field"><label>Salon Name *</label><input type="text" id="sf-name" placeholder="e.g. Lakmé Salon"></div>
+        <div class="fm-field"><label>Area *</label>
+          <select id="sf-area">
+            <option value="South Delhi">South Delhi</option>
+            <option value="Central Delhi">Central Delhi</option>
+            <option value="East Delhi">East Delhi</option>
+          </select>
+        </div>
+      </div>
+      <div class="fm-field"><label>Locality / Address *</label><input type="text" id="sf-locality" placeholder="e.g. GK-I, M Block"></div>
+      <div class="fm-row">
+        <div class="fm-field"><label>Badge</label>
+          <select id="sf-badge">
+            <option value="bridal">Bridal</option>
+            <option value="luxury">Luxury</option>
+            <option value="premium">Premium</option>
+          </select>
+        </div>
+        <div class="fm-field"><label>Status</label>
+          <select id="sf-open">
+            <option value="true">Open</option>
+            <option value="false">Closed</option>
+          </select>
+        </div>
+      </div>
+      <div class="fm-row">
+        <div class="fm-field"><label>Rating</label><input type="number" id="sf-rating" step="0.1" min="1" max="5" value="4.5"></div>
+        <div class="fm-field"><label>Hours</label><input type="text" id="sf-hours" placeholder="10 AM – 8 PM"></div>
+      </div>
+      <div class="fm-row">
+        <div class="fm-field"><label>Phone</label><input type="text" id="sf-phone" placeholder="+91 98…"></div>
+        <div class="fm-field"><label>Distance</label><input type="text" id="sf-dist" placeholder="2.5 km"></div>
+      </div>
+      <div class="fm-row">
+        <div class="fm-field"><label>GPS Lat</label><input type="text" id="sf-lat" placeholder="28.5..."></div>
+        <div class="fm-field"><label>GPS Lng</label><input type="text" id="sf-lng" placeholder="77.2..."></div>
+      </div>
+      <div class="fm-field"><label>Specialities (comma separated)</label><input type="text" id="sf-specs" placeholder="Hair, Makeup, Bridal"></div>
+      <div class="fm-field"><label>Services (Name:₹Price, …)</label><textarea id="sf-services" placeholder="Bridal Package:₹18000, Hair Color:₹2500"></textarea></div>
+    </div>
+    <div class="fm-footer">
+      <button class="fm-cancel" onclick="closeSalonForm()">Cancel</button>
+      <button class="fm-save" onclick="saveSalon()"><i class="ti ti-check"></i> Save Salon</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── CONFIRM DIALOG ─── -->
+<div class="confirm-bg" id="confirmBg">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirmTitle">Confirm Action</div>
+    <div class="confirm-msg" id="confirmMsg">Are you sure?</div>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" onclick="document.getElementById('confirmBg').classList.remove('open')">Cancel</button>
+      <button class="confirm-ok" id="confirmOk">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOASTS ─── -->
+<div class="toast" id="siteToast"></div>
+<div class="admin-toast" id="adminToast"></div>
+
+<!-- ─── AI ASSISTANT ─── -->
+<button class="ai-fab" id="aiFab" onclick="openAIChat()"><i class="ti ti-message-chatbot"></i></button>
+<div class="ai-panel" id="aiPanel">
+  <div class="ai-header">
+    <div class="ai-header-left">
+      <div class="ai-avatar"><i class="ti ti-sparkles"></i></div>
+      <div>
+        <div class="ai-header-name">Glamoura AI</div>
+        <div class="ai-header-sub">Ask me to find or book a salon</div>
+      </div>
+    </div>
+    <button class="ai-close" onclick="closeAIChat()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="ai-messages" id="aiMessages"></div>
+  <div class="ai-input-row">
+    <input type="text" id="aiInput" placeholder="e.g. Book me a bridal salon in CP tomorrow at 4pm" onkeydown="if(event.key==='Enter')sendAIMessage()">
+    <button class="ai-send" onclick="sendAIMessage()"><i class="ti ti-send"></i></button>
+  </div>
+</div>
+
+<!-- ─── PWA INSTALL BANNER ─── -->
+<div class="pwa-banner" id="pwaBanner">
+  <div class="pwa-icon"><i class="ti ti-device-mobile"></i></div>
+  <div class="pwa-text">
+    <div class="pwa-text-h">Install Glamoura</div>
+    <div class="pwa-text-p">Add to your home screen for one-tap booking</div>
+  </div>
+  <div class="pwa-actions">
+    <button class="pwa-install" onclick="installPWA()">Install</button>
+    <button class="pwa-dismiss" onclick="dismissPWA()"><i class="ti ti-x"></i></button>
+  </div>
+</div>
+
+<!-- ─── MOBILE SIDEBAR TOGGLE ─── -->
+<button class="sb-toggle" id="sbToggle" onclick="toggleSidebar()"><i class="ti ti-menu-2"></i></button>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ══════════════════════════════════════════════════
+// DATA STORE (in-memory — no backend needed)
+// ══════════════════════════════════════════════════
+let SALONS = [
+  {id:1,  name:"Lakmé Salon",             area:"South Delhi",   locality:"GK-I, M Block Market",         rating:4.8,reviews:312,open:true, hours:"9 AM – 8 PM",      phone:"+91 98101 23456",dist:"1.2 km",badge:"bridal",  lat:28.5483,lng:77.2315,emoji:"💄",specialities:["Bridal Makeup","Hair Color","Skin Care","Nail Art"],          services:[{n:"Bridal Package",p:"₹18,000"},{n:"Hair Color",p:"₹2,500"},{n:"Facial",p:"₹1,200"},{n:"Nail Art",p:"₹800"}]},
+  {id:2,  name:"Jean-Claude Biguine",     area:"South Delhi",   locality:"Saket, Select Citywalk",       rating:4.6,reviews:198,open:true, hours:"10 AM – 9 PM",     phone:"+91 98201 34567",dist:"2.1 km",badge:"luxury",  lat:28.5274,lng:77.2167,emoji:"✂️",specialities:["French Techniques","Hair Spa","Keratin","Blow Dry"],          services:[{n:"Keratin Treatment",p:"₹6,500"},{n:"Hair Spa",p:"₹2,800"},{n:"Anti-Aging Facial",p:"₹3,500"},{n:"Blow Dry",p:"₹900"}]},
+  {id:3,  name:"Schwarzkopf Professional",area:"South Delhi",   locality:"Hauz Khas Village",            rating:4.5,reviews:145,open:false,hours:"10 AM – 7 PM",     phone:"+91 98301 45678",dist:"3.4 km",badge:"premium", lat:28.5494,lng:77.2001,emoji:"🎨",specialities:["Balayage","Ombre","Scalp Treatment","Hair Cut"],               services:[{n:"Balayage",p:"₹4,500"},{n:"Ombre",p:"₹5,000"},{n:"Root Touch-up",p:"₹1,800"},{n:"Hair Cut",p:"₹700"}]},
+  {id:4,  name:"Shahnaz Husain Beauty",   area:"Central Delhi", locality:"Connaught Place, N Block",     rating:4.9,reviews:421,open:true, hours:"9 AM – 9 PM",      phone:"+91 98401 56789",dist:"4.2 km",badge:"bridal",  lat:28.6315,lng:77.2167,emoji:"🌿",specialities:["Herbal Bridal","Ayurvedic Facials","Skin Brightening","Mehendi"],services:[{n:"Pre-Bridal Package",p:"₹25,000"},{n:"Herbal Facial",p:"₹2,200"},{n:"Skin Brightening",p:"₹3,000"},{n:"Mehendi",p:"₹5,000"}]},
+  {id:5,  name:"Enrich Salon",            area:"Central Delhi", locality:"Karol Bagh, Main Market",      rating:4.4,reviews:267,open:true, hours:"9:30 AM – 8:30 PM",phone:"+91 98501 67890",dist:"5.1 km",badge:"premium", lat:28.6519,lng:77.1906,emoji:"💅",specialities:["Hair Rebonding","Makeup Studio","Waxing","Threading"],            services:[{n:"Hair Rebonding",p:"₹3,500"},{n:"Full Makeup",p:"₹4,500"},{n:"Waxing (Full)",p:"₹1,500"},{n:"Threading",p:"₹80"}]},
+  {id:6,  name:"Purple Panache",          area:"East Delhi",    locality:"Preet Vihar, Vikas Marg",      rating:4.3,reviews:189,open:true, hours:"10 AM – 8 PM",     phone:"+91 98601 78901",dist:"6.3 km",badge:"premium", lat:28.6412,lng:77.2998,emoji:"💜",specialities:["Nail Studio","Lash Extensions","Eyebrow Microblading"],         services:[{n:"Nail Extensions",p:"₹2,000"},{n:"Lash Extensions",p:"₹3,500"},{n:"Microblading",p:"₹8,000"},{n:"Cleanup",p:"₹600"}]},
+  {id:7,  name:"Truefitt & Hill",         area:"Central Delhi", locality:"Connaught Place, P Block",     rating:4.7,reviews:334,open:true, hours:"9 AM – 9 PM",      phone:"+91 98701 89012",dist:"4.8 km",badge:"luxury",  lat:28.6328,lng:77.2197,emoji:"🏆",specialities:["Signature Facials","Bridal Hair","Hair Color","Head Massage"],  services:[{n:"Signature Facial",p:"₹5,000"},{n:"Bridal Updo",p:"₹8,000"},{n:"Hair Color",p:"₹3,000"},{n:"Head Massage",p:"₹1,500"}]},
+  {id:8,  name:"Glam Studios",            area:"East Delhi",    locality:"Laxmi Nagar, Metro Market",    rating:4.2,reviews:156,open:false,hours:"10 AM – 7 PM",     phone:"+91 98801 90123",dist:"7.1 km",badge:"premium", lat:28.6337,lng:77.2785,emoji:"✨",specialities:["Budget Bridal","Party Makeup","Hair Styling","Waxing"],           services:[{n:"Budget Bridal Pkg",p:"₹8,000"},{n:"Party Makeup",p:"₹2,500"},{n:"Hair Styling",p:"₹800"},{n:"Threading",p:"₹60"}]},
+  {id:9,  name:"VLCC Wellness",           area:"South Delhi",   locality:"Saket, Ambience Mall",         rating:4.5,reviews:289,open:true, hours:"10 AM – 9 PM",     phone:"+91 98901 01234",dist:"2.8 km",badge:"premium", lat:28.5264,lng:77.2127,emoji:"🌸",specialities:["Weight & Wellness","Skin Treatments","Body Spa","Hair Care"],    services:[{n:"Body Wrap",p:"₹4,500"},{n:"De-tan Facial",p:"₹1,800"},{n:"Slimming Session",p:"₹6,000"},{n:"Hair Spa",p:"₹2,000"}]},
+  {id:10, name:"Aarav Salon & Spa",       area:"East Delhi",    locality:"Preet Vihar, Patparganj",      rating:4.4,reviews:112,open:true, hours:"9:30 AM – 8 PM",   phone:"+91 99001 12345",dist:"6.9 km",badge:"bridal",  lat:28.6397,lng:77.3012,emoji:"💍",specialities:["Bridal Packages","Mehndi","Hair Spa","Makeup"],                 services:[{n:"Bridal Makeup",p:"₹12,000"},{n:"Mehndi Artist",p:"₹3,000"},{n:"Hair Spa",p:"₹2,200"},{n:"Pre-bridal Facial",p:"₹2,500"}]},
+  {id:11, name:"TONI&GUY",               area:"South Delhi",   locality:"GK-II, M Block",               rating:4.6,reviews:378,open:true, hours:"10 AM – 8 PM",     phone:"+91 99101 23456",dist:"1.8 km",badge:"luxury",  lat:28.5378,lng:77.2412,emoji:"✂️",specialities:["British Haircut","Color Correction","Blow-dry Bar","Styling"],    services:[{n:"Signature Haircut",p:"₹2,200"},{n:"Color Correction",p:"₹7,000"},{n:"Blow Dry",p:"₹1,200"},{n:"Conditioning",p:"₹1,800"}]},
+  {id:12, name:"Naturals Salon",          area:"Central Delhi", locality:"Karol Bagh, Pusa Road",        rating:4.3,reviews:203,open:false,hours:"9 AM – 7:30 PM",   phone:"+91 99201 34567",dist:"5.6 km",badge:"premium", lat:28.6484,lng:77.1867,emoji:"🌿",specialities:["Natural Hair Care","Organic Treatments","Hair Spa","Facials"],  services:[{n:"Organic Facial",p:"₹1,500"},{n:"Natural Hair Color",p:"₹3,200"},{n:"Deep Conditioning",p:"₹1,800"},{n:"Scalp Treatment",p:"₹2,000"}]},
+];
+
+let BOOKINGS = [];
+let SEC_LOGS = [];
+let activeFilter = 'all';
+let searchQuery = '';
+let _bookingSalonId = null;
+let _sessionStart = null;
+let _sessionInterval = null;
+let _adminLoggedIn = false;
+let _failedLogins = 0;
+let _pendingDeleteId = null;
+
+// ── MAP / AI / DETAIL / PWA STATE ──
+const GROQ_API_KEY = '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'; // ← paste Lakshya's Groq key here (starts with gsk_)
+let leafletMap = null;
+let markerLayer = null;
+let userMarker = null;
+let userLat = null, userLng = null;
+let activeMapArea = 'all';
+let _detailSalonId = null;
+let aiConversation = [];
+let aiOpen = false;
+let deferredPWAPrompt = null;
+
+let promotions = [
+  {id:1,title:"Bridal Season Special",desc:"20% off all bridal packages in June",active:true},
+  {id:2,title:"New Customer Offer",desc:"₹500 off first booking with code GLAM500",active:true},
+  {id:3,title:"Weekend Hair Spa",desc:"Free hair spa with any colour service on weekends",active:false},
+];
+let banners = [
+  {id:1,text:"✦ Bridal Season Special — Book now and get 20% off",visible:true},
+  {id:2,text:"Free consultation with every bridal package this month",visible:false},
+  {id:3,text:"New salons added in East Delhi — Explore now",visible:true},
+];
+const sampleReviews = [
+  {salon:"Lakmé Salon",name:"Priya Sharma",stars:5,text:"Absolutely stunning bridal work. Worth every rupee!",date:"2 days ago"},
+  {salon:"Shahnaz Husain Beauty",name:"Ishita Rajput",stars:5,text:"Got my bridal package done here. The herbal treatments were amazing.",date:"1 day ago"},
+  {salon:"TONI&GUY",name:"Misha Kapoor",stars:5,text:"Color correction was perfection. Best salon in South Delhi!",date:"1 day ago"},
+  {salon:"Jean-Claude Biguine",name:"Ananya Singh",stars:5,text:"The keratin treatment was life-changing. So smooth!",date:"3 days ago"},
+  {salon:"Purple Panache",name:"Ritika Saxena",stars:5,text:"Best nail studio in East Delhi. Super clean and professional.",date:"2 days ago"},
+];
+
+// ── SECURITY LOG ──
+function secLog(type, msg) {
+  const time = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  SEC_LOGS.push({time,type,msg});
+  const alerts = SEC_LOGS.filter(l=>l.type==='danger'||l.type==='warn').length;
+  const el = document.getElementById('dsh-alerts');
+  if(el) el.textContent = alerts;
+  renderSecLog();
+}
+
+function renderSecLog() {
+  const el = document.getElementById('secLog'); if(!el) return;
+  el.innerHTML = [...SEC_LOGS].reverse().map(l=>
+    `<div class="sl-line"><span class="sl-time">[${l.time}]</span><span class="sl-msg ${l.type}">${l.type.toUpperCase()} — ${l.msg}</span></div>`
+  ).join('');
+}
+function clearSecLog() { SEC_LOGS.length=0; renderSecLog(); aToast('Security log cleared'); }
+
+// ── VIEW SWITCHER ──
+function switchView(v) {
+  document.getElementById('view-customer').style.display = v==='customer' ? 'block' : 'none';
+  const adminEl = document.getElementById('view-admin');
+  adminEl.classList.toggle('active', v==='admin');
+  document.getElementById('tab-customer').classList.toggle('active', v==='customer');
+  document.getElementById('tab-admin').classList.toggle('active', v==='admin');
+  document.getElementById('sbToggle').style.display = v==='admin' ? '' : 'none';
+  if(v==='customer') {
+    window.scrollTo(0,0);
+    renderSalonsGrid(SALONS);
+    setTimeout(()=>{ if(leafletMap) leafletMap.invalidateSize(); }, 80);
+  }
+}
+
+function switchToCustomer() { switchView('customer'); }
+
+// ── CUSTOMER FILTERS ──
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  if(el) el.classList.add('active');
+  applyFilters();
+}
+
+function setFilterFromMap(area) {
+  activeFilter = area;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  switchView('customer');
+  setTimeout(()=>{
+    const el = document.querySelector('.salons-section');
+    if(el) el.scrollIntoView({behavior:'smooth'});
+  }, 100);
+  applyFilters();
+}
+
+function heroFilter(q) {
+  searchQuery = q;
+  applyFilters();
+  if(q) {
+    const el = document.querySelector('.salons-section');
+    if(el) el.scrollIntoView({behavior:'smooth'});
+  }
+}
+
+function applyFilters() {
+  let list = [...SALONS];
+  if(searchQuery) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(s=>s.name.toLowerCase().includes(q)||s.locality.toLowerCase().includes(q)||s.area.toLowerCase().includes(q)||(s.specialities||[]).some(sp=>sp.toLowerCase().includes(q)));
+  }
+  if(activeFilter==='open') list = list.filter(s=>s.open);
+  else if(['South Delhi','Central Delhi','East Delhi'].includes(activeFilter)) list = list.filter(s=>s.area===activeFilter);
+  else if(['bridal','luxury','premium'].includes(activeFilter)) list = list.filter(s=>s.badge===activeFilter);
+  renderSalonsGrid(list);
+}
+
+// ── CUSTOMER SALON CARDS ──
+function renderSalonsGrid(list) {
+  const el = document.getElementById('salonsGrid'); if(!el) return;
+  document.getElementById('salonCountLabel').textContent = `Showing ${list.length} salon${list.length!==1?'s':''}`;
+  if(list.length===0){
+    el.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted)"><i class="ti ti-search" style="font-size:2rem;opacity:.3"></i><p style="margin-top:.75rem">No salons match your filter.<br><a href="#" onclick="setFilter('all',null);document.querySelectorAll('.filter-chip')[0].classList.add('active');" style="color:var(--gold-dark)">Clear filters</a></p></div>`;
+    return;
+  }
+  el.innerHTML = list.map(s=>{
+    const firstSvc = s.services && s.services[0];
+    return `<div class="salon-card" onclick="viewSalonDetails(${s.id})">
+      <div class="card-img">
+        <div class="card-img-pattern"></div>
+        <div class="card-img-emoji">${s.emoji||'✂️'}</div>
+        <span class="card-badge badge-${s.badge}">${s.badge.charAt(0).toUpperCase()+s.badge.slice(1)}</span>
+        <span class="card-open-pill ${s.open?'open':'closed'}"><span class="card-open-dot"></span>${s.open?'Open':'Closed'}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-name">${s.name}</div>
+        <div class="card-locality"><i class="ti ti-map-pin" style="font-size:11px"></i> ${s.locality}</div>
+        <div class="card-meta">
+          <div class="card-rating"><i class="ti ti-star-filled" style="font-size:12px"></i>${s.rating}<span>(${s.reviews})</span></div>
+          <div class="card-dist"><i class="ti ti-navigation" style="font-size:11px"></i>${s.dist}</div>
+          ${s.hours?`<div style="font-size:11px;color:var(--text-light)"><i class="ti ti-clock" style="font-size:11px"></i> ${s.hours}</div>`:''}
+        </div>
+        <div class="card-specialities">${(s.specialities||[]).slice(0,3).map(sp=>`<span class="spec-tag">${sp}</span>`).join('')}</div>
+      </div>
+      <div class="card-footer">
+        <div class="card-price">from <strong>${firstSvc?firstSvc.p:'—'}</strong></div>
+        <button class="card-book-btn" ${!s.open?'disabled title="Currently closed"':''} onclick="event.stopPropagation();openBooking(${s.id})"><i class="ti ti-calendar-plus" style="font-size:13px"></i> Book</button>
+      </div>
+    </div>`;
+  }).join('');
+  updateAreaCounts();
+}
+
+function updateAreaCounts() {
+  document.getElementById('heroStatSalons').textContent = SALONS.length;
+  document.getElementById('heroStatOpen').textContent = SALONS.filter(s=>s.open).length;
+  document.getElementById('areaSouth').textContent = SALONS.filter(s=>s.area==='South Delhi').length + ' salons';
+  document.getElementById('areaCentral').textContent = SALONS.filter(s=>s.area==='Central Delhi').length + ' salons';
+  document.getElementById('areaEast').textContent = SALONS.filter(s=>s.area==='East Delhi').length + ' salons';
+  document.getElementById('areaOpen').textContent = SALONS.filter(s=>s.open).length + ' open now';
+}
+
+// ── BOOKING MODAL ──
+function openBooking(salonId) {
+  const s = SALONS.find(x=>x.id===salonId); if(!s) return;
+  if(!s.open){ siteToast('This salon is currently closed'); return; }
+  _bookingSalonId = salonId;
+  document.getElementById('bmTitle').textContent = 'Book at ' + s.name;
+  document.getElementById('bmSalonInfo').innerHTML = `<div style="font-size:22px;margin-right:.25rem">${s.emoji||'✂️'}</div><div><div class="bm-salon-name">${s.name}</div><div class="bm-salon-meta"><i class="ti ti-map-pin" style="font-size:11px"></i> ${s.locality} · ★${s.rating} · ${s.dist}</div></div>`;
+  const svcEl = document.getElementById('bm-service');
+  svcEl.innerHTML = (s.services||[]).map(sv=>`<option value="${sv.n}">${sv.n} — ${sv.p}</option>`).join('');
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('bm-date').min = today;
+  document.getElementById('bm-date').value = today;
+  document.getElementById('bmFormWrap').style.display='';
+  document.getElementById('bmSuccess').style.display='none';
+  document.getElementById('bmError').classList.remove('show');
+  document.getElementById('bm-name').value='';
+  document.getElementById('bm-phone').value='';
+  document.getElementById('bookingModal').classList.add('open');
+}
+
+function openBookingFromNav() {
+  const open = SALONS.filter(s=>s.open);
+  if(open.length) openBooking(open[0].id);
+  else siteToast('No salons open right now');
+}
+
+function closeBooking() { document.getElementById('bookingModal').classList.remove('open'); }
+
+function submitBooking() {
+  const name = document.getElementById('bm-name').value.trim();
+  const phone = document.getElementById('bm-phone').value.trim();
+  const service = document.getElementById('bm-service').value;
+  const date = document.getElementById('bm-date').value;
+  const time = document.getElementById('bm-time').value;
+  const showErr = (msg)=>{ document.getElementById('bmErrorMsg').textContent=msg; document.getElementById('bmError').classList.add('show'); };
+  document.getElementById('bmError').classList.remove('show');
+  if(!name){ showErr('Please enter your name.'); return; }
+  if(!phone||!/^\+?[0-9\s\-]{7,20}$/.test(phone)){ showErr('Please enter a valid phone number.'); return; }
+  if(!date){ showErr('Please select a date.'); return; }
+  if(!time){ showErr('Please select a time slot.'); return; }
+  const conflict = BOOKINGS.find(b=>b.salonId===_bookingSalonId&&b.date===date&&b.time===time&&b.status!=='cancelled');
+  if(conflict){ showErr('That slot is already booked. Please choose a different time.'); return; }
+  const salon = SALONS.find(s=>s.id===_bookingSalonId);
+  const ref = 'BK' + Date.now();
+  const booking = {id:ref,salonId:_bookingSalonId,salonName:salon.name,name,phone,service,date,time,status:'confirmed',createdAt:new Date().toISOString()};
+  BOOKINGS.push(booking);
+  document.getElementById('bmRef').textContent = ref;
+  document.getElementById('bmFormWrap').style.display='none';
+  document.getElementById('bmSuccess').style.display='';
+  secLog('info', `New booking: ${ref} at ${salon.name} for ${name}`);
+  document.getElementById('sbBookingCount').textContent = BOOKINGS.filter(b=>b.status!=='cancelled').length;
+  document.getElementById('dsh-bookings').textContent = BOOKINGS.filter(b=>b.status!=='cancelled').length;
+  updateMyBookingsBadge();
+  renderMapPins(activeMapArea==='all' ? SALONS : SALONS.filter(s=>s.area===activeMapArea));
+}
+
+function siteToast(msg) {
+  const t=document.getElementById('siteToast');
+  t.innerHTML=`<i class="ti ti-info-circle"></i>${msg}`;
+  t.classList.add('show');
+  clearTimeout(window._st);
+  window._st=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ══════════════════════════════════════════════════
+// LIVE MAP (Leaflet.js + CartoDB Dark Matter)
+// ══════════════════════════════════════════════════
+function initMap() {
+  if (leafletMap) return;
+  leafletMap = L.map('salonsLeafletMap', { zoomControl: true, attributionControl: false }).setView([28.60, 77.21], 11);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap &copy; CARTO'
+  }).addTo(leafletMap);
+  markerLayer = L.layerGroup().addTo(leafletMap);
+  renderMapPins(SALONS);
+}
+
+function pinIcon(s) {
+  const statusColor = s.open ? '#27AE60' : '#C0392B';
+  const checkmark = BOOKINGS.some(b=>b.salonId===s.id && b.status!=='cancelled')
+    ? `<circle cx="19" cy="7" r="6" fill="#C9A84C" stroke="#0A0A0A" stroke-width="1.5"/><path d="M16.3 7l1.7 1.7 3-3.2" stroke="#0A0A0A" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
+    : '';
+  const svg = `
+    <svg width="34" height="44" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17 0C7.6 0 0 7.6 0 17c0 11.5 17 27 17 27s17-15.5 17-27C34 7.6 26.4 0 17 0z" fill="#C9A84C" stroke="#0A0A0A" stroke-width="1"/>
+      <circle cx="17" cy="17" r="9" fill="#0A0A0A"/>
+      <circle cx="13" cy="13" r="3.2" fill="${statusColor}" stroke="#0A0A0A" stroke-width="1"/>
+      ${checkmark}
+    </svg>`;
+  return L.divIcon({ html: svg, className: 'gl-pin', iconSize: [34,44], iconAnchor: [17,44], popupAnchor: [0,-40] });
+}
+
+function renderMapPins(list) {
+  if (!markerLayer) return;
+  markerLayer.clearLayers();
+  list.forEach(s => {
+    const marker = L.marker([s.lat, s.lng], { icon: pinIcon(s) });
+    marker.bindPopup(`
+      <div class="gl-pop-name">${s.name}</div>
+      <div class="gl-pop-meta"><i class="ti ti-star-filled" style="color:#C9A84C;font-size:11px"></i> ${s.rating} · ${s.locality}</div>
+      <button class="gl-pop-btn" onclick="closeAllPopups();viewSalonDetails(${s.id})">View Details &amp; Book</button>
+    `, { className: 'gl-popup', closeButton: true });
+    marker.addTo(markerLayer);
+  });
+}
+
+function closeAllPopups() { if (leafletMap) leafletMap.closePopup(); }
+
+function setMapArea(area, el) {
+  activeMapArea = area;
+  document.querySelectorAll('.map-pill').forEach(p=>p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const list = area==='all' ? SALONS : SALONS.filter(s=>s.area===area);
+  renderMapPins(list);
+  if (!leafletMap) return;
+  if (area==='all') {
+    leafletMap.flyTo([28.60, 77.21], 11, { duration: 0.8 });
+  } else if (list.length) {
+    const bounds = L.latLngBounds(list.map(s=>[s.lat, s.lng]));
+    leafletMap.flyToBounds(bounds, { padding: [40,40], duration: 0.8 });
+  }
+}
+
+function locateMe() {
+  const btn = document.getElementById('locateBtn');
+  if (!navigator.geolocation) { siteToast('Geolocation is not supported on this device'); return; }
+  btn.classList.add('busy');
+  btn.innerHTML = '<i class="ti ti-loader-2"></i> Locating…';
+  navigator.geolocation.getCurrentPosition(pos => {
+    userLat = pos.coords.latitude;
+    userLng = pos.coords.longitude;
+    btn.classList.remove('busy');
+    btn.innerHTML = '<i class="ti ti-current-location"></i> My Location';
+    if (!leafletMap) return;
+    if (userMarker) leafletMap.removeLayer(userMarker);
+    userMarker = L.circleMarker([userLat, userLng], {
+      radius: 8, color: '#4A90D9', fillColor: '#4A90D9', fillOpacity: 0.9, weight: 2
+    }).addTo(leafletMap).bindPopup('You are here');
+    leafletMap.flyTo([userLat, userLng], 13, { duration: 0.9 });
+    siteToast('Location found ✓');
+  }, () => {
+    btn.classList.remove('busy');
+    btn.innerHTML = '<i class="ti ti-current-location"></i> My Location';
+    siteToast('Could not get your location — please allow location access');
+  }, { enableHighAccuracy: true, timeout: 8000 });
+}
+
+// ══════════════════════════════════════════════════
+// SALON DETAIL MODAL
+// ══════════════════════════════════════════════════
+function viewSalonDetails(salonId) {
+  const s = SALONS.find(x=>x.id===salonId); if (!s) return;
+  _detailSalonId = salonId;
+  document.getElementById('dmTitle').textContent = s.name;
+  document.getElementById('dmEmoji').textContent = s.emoji || '✂️';
+  document.getElementById('dmName').textContent = s.name;
+  document.getElementById('dmRating').textContent = `${s.rating} (${s.reviews} reviews)`;
+  document.getElementById('dmDist').textContent = s.dist;
+  document.getElementById('dmHours').textContent = s.hours;
+  document.getElementById('dmAddr').textContent = `${s.locality}, ${s.area}`;
+  document.getElementById('dmPhone').textContent = s.phone;
+  const pill = document.getElementById('dmOpenPill');
+  pill.className = 'card-open-pill ' + (s.open ? 'open' : 'closed');
+  document.getElementById('dmOpenTxt').textContent = s.open ? 'Open' : 'Closed';
+  document.getElementById('dmServices').innerHTML = (s.services||[]).map(sv=>
+    `<div class="dm-svc-card"><div class="dm-svc-name">${sv.n}</div><div class="dm-svc-price">${sv.p}</div></div>`
+  ).join('');
+  const revs = sampleReviews.filter(r=>r.salon===s.name);
+  document.getElementById('dmReviews').innerHTML = revs.length ? revs.map(r=>`
+    <div class="dm-review">
+      <div class="dm-review-top"><span class="dm-review-name">${r.name}</span><span class="dm-review-date">${r.date}</span></div>
+      <div class="dm-review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
+      <div class="dm-review-text">${r.text}</div>
+    </div>`).join('') : '<div class="dm-empty">No reviews yet for this salon.</div>';
+  document.getElementById('dmDirections').classList.remove('show');
+  const bookBtn = document.getElementById('dmBookBtn');
+  bookBtn.disabled = !s.open;
+  bookBtn.title = s.open ? '' : 'Currently closed';
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function closeDetail() { document.getElementById('detailModal').classList.remove('open'); }
+
+function bookFromDetail() {
+  if (_detailSalonId == null) return;
+  closeDetail();
+  openBooking(_detailSalonId);
+}
+
+function getDirections() {
+  const s = SALONS.find(x=>x.id===_detailSalonId); if (!s) return;
+  const box = document.getElementById('dmDirections');
+  const txt = document.getElementById('dmDirectionsTxt');
+  let url = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`;
+  if (userLat != null && userLng != null) {
+    url = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${s.lat},${s.lng}`;
+    txt.textContent = `Route from your current location to ${s.name} (${s.dist}).`;
+  } else {
+    txt.textContent = `Opens turn-by-turn directions to ${s.name} in Google Maps.`;
+  }
+  box.classList.add('show');
+  window.open(url, '_blank');
+}
+
+// ══════════════════════════════════════════════════
+// MY BOOKINGS
+// ══════════════════════════════════════════════════
+function openMyBookings() {
+  renderMyBookings();
+  document.getElementById('myBookingsModal').classList.add('open');
+}
+function closeMyBookings() { document.getElementById('myBookingsModal').classList.remove('open'); }
+
+function renderMyBookings() {
+  const el = document.getElementById('myBookingsBody');
+  const active = BOOKINGS.filter(b=>b.status!=='cancelled');
+  updateMyBookingsBadge();
+  if (!active.length) {
+    el.innerHTML = '<div class="dm-empty" style="padding:1.5rem 0;text-align:center">No bookings yet. Book a salon to see it here.</div>';
+    return;
+  }
+  el.innerHTML = [...active].reverse().map(b => `
+    <div class="mybk-item">
+      <div class="mybk-top"><span class="mybk-salon">${b.salonName}</span><span class="pill pill-confirmed">Confirmed</span></div>
+      <div class="mybk-meta"><i class="ti ti-calendar" style="font-size:12px"></i> ${b.date} at ${b.time}<br><i class="ti ti-scissors" style="font-size:12px"></i> ${b.service}<br><i class="ti ti-id" style="font-size:12px"></i> ${b.id}</div>
+      <button class="mybk-cancel" onclick="cancelMyBooking('${b.id}')">Cancel Booking</button>
+    </div>`).join('');
+}
+
+function cancelMyBooking(id) {
+  const b = BOOKINGS.find(x=>x.id===id); if (!b) return;
+  b.status = 'cancelled';
+  secLog('warn', `Booking ${id} cancelled by customer`);
+  renderMyBookings();
+  document.getElementById('sbBookingCount').textContent = BOOKINGS.filter(x=>x.status!=='cancelled').length;
+  document.getElementById('dsh-bookings').textContent = BOOKINGS.filter(x=>x.status!=='cancelled').length;
+  renderMapPins(activeMapArea==='all' ? SALONS : SALONS.filter(s=>s.area===activeMapArea));
+  siteToast('Booking cancelled');
+}
+
+function updateMyBookingsBadge() {
+  const n = BOOKINGS.filter(b=>b.status!=='cancelled').length;
+  const badge = document.getElementById('navMyBkBadge');
+  badge.textContent = n;
+  badge.style.display = n ? '' : 'none';
+}
+
+// ══════════════════════════════════════════════════
+// AI ASSISTANT (Groq — llama-3.3-70b-versatile)
+// ══════════════════════════════════════════════════
+function openAIChat() {
+  aiOpen = true;
+  document.getElementById('aiPanel').classList.add('open');
+  document.getElementById('aiFab').classList.add('hide');
+  if (!aiConversation.length) {
+    aiAppendMessage('bot', `Hi! I'm the Glamoura AI assistant ✦ Tell me what you're after — e.g. "book a bridal salon in Central Delhi for Friday 5pm" — and I'll find or book it for you.`);
+  }
+}
+function closeAIChat() {
+  aiOpen = false;
+  document.getElementById('aiPanel').classList.remove('open');
+  document.getElementById('aiFab').classList.remove('hide');
+}
+
+function aiAppendMessage(role, text) {
+  const wrap = document.getElementById('aiMessages');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + (role==='user' ? 'user' : 'bot');
+  div.textContent = text;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function aiShowTyping() {
+  const wrap = document.getElementById('aiMessages');
+  const div = document.createElement('div');
+  div.className = 'ai-msg bot typing';
+  div.id = 'aiTyping';
+  div.innerHTML = '<span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span>';
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+function aiHideTyping() { const t = document.getElementById('aiTyping'); if (t) t.remove(); }
+
+async function sendAIMessage() {
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  aiAppendMessage('user', msg);
+  aiConversation.push({ role: 'user', content: msg });
+
+  if (!GROQ_API_KEY || GROQ_API_KEY === 'YOUR_GROQ_API_KEY_HERE') {
+    aiAppendMessage('bot', "The AI assistant needs a Groq API key before it can chat — paste it into the GROQ_API_KEY constant near the top of the script. In the meantime, you can browse and book salons directly from the Discover page or the map above!");
+    return;
+  }
+
+  aiShowTyping();
+  try {
+    const salonSummary = SALONS.map(s => `#${s.id} ${s.name} | ${s.area}, ${s.locality} | ${s.badge} | ${s.rating}★ | ${s.open?'OPEN':'CLOSED'} | hours ${s.hours} | services: ${(s.services||[]).map(sv=>sv.n+' '+sv.p).join(', ')}`).join('\n');
+    const activeBookings = BOOKINGS.filter(b=>b.status!=='cancelled').map(b => `${b.id}: ${b.salonName} on ${b.date} at ${b.time} (${b.service})`).join('\n') || 'None yet';
+
+    const systemPrompt = `You are the Glamoura AI booking assistant for a luxury Delhi salon marketplace. Help users discover salons and book appointments conversationally.
+
+SALONS:
+${salonSummary}
+
+ACTIVE BOOKINGS:
+${activeBookings}
+
+Rules:
+- Recommend salons that match the user's area, budget, or occasion.
+- To book an appointment, you MUST have: salon name/id, a service from that salon's list, a date, a time, the customer's name, and phone number. Ask for anything missing before booking.
+- Never double-book a salon at the same date+time as an existing active booking — suggest a different slot instead.
+- When you have everything needed to book, end your reply with a line in this exact format (no other text on that line):
+ACTION:{"type":"book","salonId":<id>,"service":"<service name>","date":"YYYY-MM-DD","time":"H:MM AM/PM","name":"<customer name>","phone":"<phone>"}
+- To cancel a booking the user references, end your reply with:
+ACTION:{"type":"cancel","bookingId":"<id>"}
+- Keep replies short, warm, and conversational. Only include an ACTION line when you are actually booking or cancelling — never as an example.`;
+
+    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'system', content: systemPrompt }, ...aiConversation],
+        temperature: 0.4
+      })
+    });
+    if (!resp.ok) throw new Error('Groq request failed: ' + resp.status);
+    const data = await resp.json();
+    let reply = data.choices?.[0]?.message?.content || "Sorry, I didn't catch that — could you rephrase?";
+
+    let actionMatch = reply.match(/ACTION:(\{[\s\S]*\})\s*$/);
+    let displayReply = actionMatch ? reply.slice(0, actionMatch.index).trim() : reply;
+    aiHideTyping();
+    aiAppendMessage('bot', displayReply || 'Done!');
+    aiConversation.push({ role: 'assistant', content: reply });
+
+    if (actionMatch) {
+      try {
+        const action = JSON.parse(actionMatch[1]);
+        handleAIAction(action);
+      } catch (e) { /* ignore malformed action JSON */ }
+    }
+  } catch (err) {
+    aiHideTyping();
+    aiAppendMessage('bot', "I couldn't reach the AI service just now. Please try again in a moment, or book directly from the salon list.");
+  }
+}
+
+function handleAIAction(action) {
+  if (action.type === 'book') {
+    const salon = SALONS.find(s=>s.id===action.salonId);
+    if (!salon) { aiAppendMessage('bot', "I couldn't find that salon to complete the booking."); return; }
+    const conflict = BOOKINGS.find(b=>b.salonId===action.salonId && b.date===action.date && b.time===action.time && b.status!=='cancelled');
+    if (conflict) { aiAppendMessage('bot', `That slot at ${salon.name} just got taken — want me to try a different time?`); return; }
+    const ref = 'BK' + Date.now();
+    BOOKINGS.push({ id: ref, salonId: action.salonId, salonName: salon.name, name: action.name, phone: action.phone, service: action.service, date: action.date, time: action.time, status: 'confirmed', createdAt: new Date().toISOString() });
+    secLog('info', `New booking via AI: ${ref} at ${salon.name} for ${action.name}`);
+    document.getElementById('sbBookingCount').textContent = BOOKINGS.filter(b=>b.status!=='cancelled').length;
+    document.getElementById('dsh-bookings').textContent = BOOKINGS.filter(b=>b.status!=='cancelled').length;
+    updateMyBookingsBadge();
+    renderMapPins(activeMapArea==='all' ? SALONS : SALONS.filter(s=>s.area===activeMapArea));
+    aiAppendMessage('bot', `✓ Booked! Reference ${ref} — ${salon.name} on ${action.date} at ${action.time}.`);
+  } else if (action.type === 'cancel') {
+    const b = BOOKINGS.find(x=>x.id===action.bookingId);
+    if (!b) { aiAppendMessage('bot', "I couldn't find that booking to cancel."); return; }
+    b.status = 'cancelled';
+    secLog('warn', `Booking ${b.id} cancelled via AI`);
+    document.getElementById('sbBookingCount').textContent = BOOKINGS.filter(x=>x.status!=='cancelled').length;
+    document.getElementById('dsh-bookings').textContent = BOOKINGS.filter(x=>x.status!=='cancelled').length;
+    updateMyBookingsBadge();
+    renderMapPins(activeMapArea==='all' ? SALONS : SALONS.filter(s=>s.area===activeMapArea));
+    aiAppendMessage('bot', `Cancelled booking ${b.id} at ${b.salonName}.`);
+  }
+}
+
+// ══════════════════════════════════════════════════
+// PWA INSTALL BANNER
+// ══════════════════════════════════════════════════
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPWAPrompt = e;
+  document.getElementById('pwaBanner').classList.add('show');
+});
+
+function installPWA() {
+  const banner = document.getElementById('pwaBanner');
+  if (!deferredPWAPrompt) { banner.classList.remove('show'); return; }
+  deferredPWAPrompt.prompt();
+  deferredPWAPrompt.userChoice.finally(() => {
+    deferredPWAPrompt = null;
+    banner.classList.remove('show');
+  });
+}
+function dismissPWA() { document.getElementById('pwaBanner').classList.remove('show'); }
+
+// ── ADMIN AUTH (demo: admin/admin) ──
+function doAdminLogin() {
+  const u = document.getElementById('aUser').value.trim();
+  const p = document.getElementById('aPass').value;
+  const errEl = document.getElementById('loginErr');
+  errEl.classList.remove('show');
+
+  // ── DEMO MODE: admin / admin bypasses all security checks ──
+  // This is intentional for judges/demo purposes.
+  // In production, replace with backend JWT auth (see glamoura-backend/).
+  if(u==='admin' && p==='admin') {
+    document.getElementById('adminLogin').classList.add('hidden');
+    _adminLoggedIn = true;
+    _sessionStart = Date.now();
+    startSessionTimer();
+    initAdminData();
+    secLog('success','Admin login successful — demo mode');
+    aToast('Welcome back, Admin ✓');
+    document.getElementById('aPass').value='';
+    return;
+  }
+
+  // Wrong credentials
+  _failedLogins++;
+  const el = document.getElementById('sec-failed');
+  if(el) el.textContent = _failedLogins;
+  document.getElementById('loginErrMsg').textContent = 'Incorrect credentials. Use: admin / admin';
+  errEl.classList.add('show');
+  const box = document.querySelector('.login-box');
+  box.style.animation='none'; box.offsetHeight; box.style.animation='shake .4s ease';
+  secLog('warn',`Failed login attempt #${_failedLogins} — wrong credentials`);
+  document.getElementById('aPass').value='';
+}
+
+function doAdminLogout() {
+  _adminLoggedIn = false;
+  clearInterval(_sessionInterval);
+  _sessionStart = null;
+  document.getElementById('adminLogin').classList.remove('hidden');
+  document.getElementById('aUser').value='';
+  document.getElementById('aPass').value='';
+  document.getElementById('loginErr').classList.remove('show');
+  secLog('info','Admin logged out');
+}
+
+function startSessionTimer() {
+  clearInterval(_sessionInterval);
+  _sessionInterval = setInterval(()=>{
+    if(!_sessionStart) return;
+    const e = Date.now() - _sessionStart;
+    const m = Math.floor(e/60000).toString().padStart(2,'0');
+    const s = Math.floor((e%60000)/1000).toString().padStart(2,'0');
+    document.getElementById('sessionTimer').textContent = `${m}:${s}`;
+  }, 1000);
+}
+
+// ── ADMIN NAVIGATION ──
+function adminNav(page, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  const pageEl = document.getElementById('apage-'+page);
+  if(pageEl) pageEl.classList.add('active');
+  if(el) el.classList.add('active');
+  const titles={dashboard:'Dashboard',salons:'Salons',bookings:'Bookings',reviews:'Reviews',promotions:'Promotions',banners:'Banners',security:'Security Log',settings:'Settings'};
+  document.getElementById('topbarTitle').textContent = titles[page]||page;
+  document.getElementById('topbarCrumb').textContent = `Admin / ${titles[page]||page}`;
+  if(page==='bookings') renderAdminBookings();
+  if(page==='security'){ renderSecLog(); }
+  if(page==='reviews') renderReviews();
+  if(page==='promotions') renderPromotions();
+  if(page==='banners') renderBanners();
+  // Close mobile sidebar
+  document.getElementById('adminSidebar').classList.remove('open');
+}
+
+// ── ADMIN DATA ──
+function initAdminData() {
+  renderSalonsTable(SALONS);
+  renderDashboard();
+  renderAdminBookings();
+  renderReviews();
+  renderPromotions();
+  renderBanners();
+  document.getElementById('sbSalonCount').textContent = SALONS.length;
+  document.getElementById('sbBookingCount').textContent = BOOKINGS.filter(b=>b.status!=='cancelled').length;
+}
+
+function renderDashboard() {
+  document.getElementById('dsh-salons').textContent = SALONS.length;
+  document.getElementById('dsh-open').textContent = SALONS.filter(s=>s.open).length;
+  document.getElementById('dsh-bookings').textContent = BOOKINGS.filter(b=>b.status!=='cancelled').length;
+  const areas=['South Delhi','Central Delhi','East Delhi'];
+  const counts=areas.map(a=>SALONS.filter(s=>s.area===a).length);
+  const maxC=Math.max(...counts,1);
+  document.getElementById('areaChart').innerHTML=counts.map((c,i)=>`<div class="mini-bar" style="height:${Math.max(4,(c/maxC)*44)}px" title="${areas[i]}: ${c}"></div>`).join('');
+  document.getElementById('areaLabels').innerHTML=areas.map((a,i)=>`<div class="mini-bar-lbl" style="flex:1">${a.split(' ')[0]}<br>${counts[i]}</div>`).join('');
+  const badges=[{k:'bridal',l:'Bridal',c:'#8B5E3C'},{k:'luxury',l:'Luxury',c:'#534AB7'},{k:'premium',l:'Premium',c:'#3B6D11'}];
+  document.getElementById('badgeBreakdown').innerHTML=badges.map(b=>{
+    const n=SALONS.filter(s=>s.badge===b.k).length;const pct=SALONS.length?Math.round((n/SALONS.length)*100):0;
+    return `<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:${b.c};font-weight:500">${b.l}</span><span>${n} (${pct}%)</span></div><div style="height:5px;background:#f0ece6;border-radius:3px"><div style="height:5px;background:${b.c};border-radius:3px;width:${pct}%;opacity:.75"></div></div></div>`;
+  }).join('');
+  document.getElementById('activityTable').innerHTML=[
+    {time:'Now',event:'Admin Active',details:'Session running',status:'confirmed'},
+    {time:'—',event:'Salons Loaded',details:`${SALONS.length} in-memory`,status:'confirmed'},
+    {time:'—',event:'Bookings',details:`${BOOKINGS.length} total`,status:'confirmed'},
+  ].map(a=>`<tr><td>${a.time}</td><td>${a.event}</td><td style="color:var(--text-muted)">${a.details}</td><td><span class="pill pill-${a.status}">${a.status}</span></td></tr>`).join('');
+}
+
+// ── SALON ADMIN CRUD ──
+function renderSalonsTable(list) {
+  document.getElementById('salonsTable').innerHTML = list.map(s=>`
+    <tr>
+      <td><div class="td-name">${s.name}</div><div class="td-sub">${s.locality}</div></td>
+      <td style="font-size:12px">${s.area}</td>
+      <td><span class="pill pill-${s.badge}">${s.badge.charAt(0).toUpperCase()+s.badge.slice(1)}</span></td>
+      <td><span class="rating-star">★</span> ${s.rating}</td>
+      <td><span class="pill ${s.open?'pill-open':'pill-closed'}">${s.open?'Open':'Closed'}</span></td>
+      <td style="font-size:11px;color:var(--text-muted)">${s.hours||'—'}</td>
+      <td><div class="tbl-actions">
+        <button class="tbl-btn" onclick="toggleSalonStatus(${s.id})"><i class="ti ti-toggle-${s.open?'right':'left'}"></i> ${s.open?'Close':'Open'}</button>
+        <button class="tbl-btn" onclick="openEditSalon(${s.id})"><i class="ti ti-edit"></i> Edit</button>
+        <button class="tbl-btn d" onclick="confirmDelete(${s.id},'${s.name.replace(/'/g,"\\'")}')"><i class="ti ti-trash"></i></button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function filterAdminSalons(q) {
+  const f=SALONS.filter(s=>s.name.toLowerCase().includes(q.toLowerCase())||s.locality.toLowerCase().includes(q.toLowerCase())||s.area.toLowerCase().includes(q.toLowerCase()));
+  renderSalonsTable(f);
+}
+
+function toggleSalonStatus(id) {
+  const s=SALONS.find(s=>s.id===id); if(!s) return;
+  s.open = !s.open;
+  renderSalonsTable(SALONS);
+  renderDashboard();
+  renderSalonsGrid(SALONS);
+  aToast(`${s.name} is now ${s.open?'Open':'Closed'}`);
+  secLog('info',`Toggled: ${s.name} → ${s.open?'Open':'Closed'}`);
+}
+
+function openAddSalon() {
+  document.getElementById('editSalonId').value='';
+  document.getElementById('sfTitle').textContent='Add New Salon';
+  ['sf-name','sf-locality','sf-lat','sf-lng','sf-phone','sf-dist','sf-hours','sf-specs','sf-services'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('sf-rating').value='4.5';
+  document.getElementById('salonFormBg').classList.add('open');
+}
+
+function openEditSalon(id) {
+  const s=SALONS.find(s=>s.id===id); if(!s) return;
+  document.getElementById('editSalonId').value=id;
+  document.getElementById('sfTitle').textContent='Edit Salon';
+  document.getElementById('sf-name').value=s.name;
+  document.getElementById('sf-area').value=s.area;
+  document.getElementById('sf-locality').value=s.locality;
+  document.getElementById('sf-badge').value=s.badge;
+  document.getElementById('sf-open').value=String(s.open);
+  document.getElementById('sf-rating').value=s.rating;
+  document.getElementById('sf-hours').value=s.hours||'';
+  document.getElementById('sf-phone').value=s.phone||'';
+  document.getElementById('sf-dist').value=s.dist||'';
+  document.getElementById('sf-lat').value=s.lat||'';
+  document.getElementById('sf-lng').value=s.lng||'';
+  document.getElementById('sf-specs').value=(s.specialities||[]).join(', ');
+  document.getElementById('sf-services').value=(s.services||[]).map(sv=>sv.n+':'+sv.p).join(', ');
+  document.getElementById('salonFormBg').classList.add('open');
+}
+
+function closeSalonForm() { document.getElementById('salonFormBg').classList.remove('open'); }
+
+function saveSalon() {
+  const name=document.getElementById('sf-name').value.trim();
+  const locality=document.getElementById('sf-locality').value.trim();
+  if(!name||!locality){ aToast('Name and locality are required'); return; }
+  const editId=parseInt(document.getElementById('editSalonId').value);
+  const specs=document.getElementById('sf-specs').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const services=document.getElementById('sf-services').value.split(',').map(s=>{const[n,...pp]=s.split(':');return{n:n?.trim()||'',p:(pp.join(':')?.trim()||'')};}).filter(s=>s.n);
+  const data={
+    name,area:document.getElementById('sf-area').value,locality,
+    badge:document.getElementById('sf-badge').value,
+    open:document.getElementById('sf-open').value==='true',
+    rating:parseFloat(document.getElementById('sf-rating').value)||4.5,
+    hours:document.getElementById('sf-hours').value.trim(),
+    phone:document.getElementById('sf-phone').value.trim(),
+    dist:document.getElementById('sf-dist').value.trim(),
+    lat:parseFloat(document.getElementById('sf-lat').value)||28.5921,
+    lng:parseFloat(document.getElementById('sf-lng').value)||77.2200,
+    specialities:specs,
+    services:services.length?services:[{n:'Service',p:'₹1,000'}],
+    emoji:'✂️',
+  };
+  if(editId) {
+    const idx=SALONS.findIndex(s=>s.id===editId);
+    if(idx>-1) SALONS[idx]={...SALONS[idx],...data};
+    aToast(`${name} updated ✓`);
+    secLog('info',`Salon edited: ${name}`);
+  } else {
+    const newId = Math.max(...SALONS.map(s=>s.id))+1;
+    SALONS.push({...data,id:newId,reviews:0});
+    aToast(`${name} added ✓`);
+    secLog('info',`Salon added: ${name}`);
+  }
+  renderSalonsTable(SALONS);
+  renderDashboard();
+  renderSalonsGrid(SALONS);
+  document.getElementById('sbSalonCount').textContent=SALONS.length;
+  closeSalonForm();
+}
+
+function confirmDelete(id, name) {
+  _pendingDeleteId=id;
+  document.getElementById('confirmTitle').textContent='Delete Salon';
+  document.getElementById('confirmMsg').textContent=`Remove "${name}" from the marketplace? This cannot be undone.`;
+  document.getElementById('confirmOk').onclick=()=>{
+    SALONS=SALONS.filter(s=>s.id!==_pendingDeleteId);
+    renderSalonsTable(SALONS);
+    renderDashboard();
+    renderSalonsGrid(SALONS);
+    document.getElementById('sbSalonCount').textContent=SALONS.length;
+    aToast(`${name} deleted`);
+    secLog('warn',`Salon deleted: ${name}`);
+    document.getElementById('confirmBg').classList.remove('open');
+  };
+  document.getElementById('confirmBg').classList.add('open');
+}
+
+// ── BOOKINGS ADMIN ──
+function renderAdminBookings() {
+  const list=BOOKINGS.filter(b=>b.status!=='cancelled');
+  const empty=document.getElementById('bookingsEmpty');
+  const wrap=document.getElementById('bookingsTableWrap');
+  document.getElementById('sbBookingCount').textContent=list.length;
+  document.getElementById('dsh-bookings').textContent=list.length;
+  if(list.length===0){empty.style.display='flex';wrap.style.display='none';return;}
+  empty.style.display='none';wrap.style.display='block';
+  document.getElementById('bookingsTable').innerHTML=list.map(b=>`
+    <tr>
+      <td style="font-size:11px;color:var(--gold-dark);font-family:monospace">${b.id.slice(-8)}</td>
+      <td><div style="font-weight:500">${b.name}</div><div class="td-sub">${b.phone||'—'}</div></td>
+      <td style="font-size:12px">${b.salonName}</td>
+      <td style="font-size:12px">${b.service}</td>
+      <td style="font-size:12px">${b.date}</td>
+      <td style="font-size:12px">${b.time}</td>
+      <td><span class="pill pill-confirmed">Confirmed</span></td>
+      <td><button class="tbl-btn d" onclick="cancelBooking('${b.id}')"><i class="ti ti-x"></i> Cancel</button></td>
+    </tr>`).join('');
+}
+
+function cancelBooking(id) {
+  const b=BOOKINGS.find(b=>b.id===id); if(!b) return;
+  b.status='cancelled';
+  renderAdminBookings();
+  updateMyBookingsBadge();
+  renderMapPins(activeMapArea==='all' ? SALONS : SALONS.filter(s=>s.area===activeMapArea));
+  aToast('Booking cancelled');
+  secLog('info',`Booking cancelled: ${id}`);
+}
+
+function exportBookings() {
+  const list=BOOKINGS.filter(b=>b.status!=='cancelled');
+  if(!list.length){aToast('No bookings to export');return;}
+  const csv=['Ref,Customer,Phone,Salon,Service,Date,Time',...list.map(b=>`${b.id},${b.name},${b.phone||''},${b.salonName},${b.service},${b.date},${b.time}`)].join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='glamoura_bookings.csv';a.click();
+  secLog('info','Bookings exported as CSV');
+}
+
+// ── REVIEWS ──
+function renderReviews() {
+  document.getElementById('reviewsList').innerHTML=sampleReviews.map((r,i)=>`
+    <div class="table-wrap" style="margin-bottom:.75rem">
+      <div style="padding:.9rem 1.1rem;display:flex;align-items:flex-start;gap:.9rem">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.25rem;flex-wrap:wrap">
+            <strong style="font-family:'Playfair Display',serif">${r.name}</strong>
+            <span style="font-size:11px;color:var(--text-muted)">→ ${r.salon}</span>
+            <span style="font-size:11px;color:var(--text-light)">${r.date}</span>
+          </div>
+          <div style="color:var(--gold);font-size:13px;margin-bottom:.2rem">${'★'.repeat(r.stars)}</div>
+          <div style="font-size:13px;color:var(--text-muted)">${r.text}</div>
+        </div>
+        <div class="tbl-actions">
+          <button class="tbl-btn" onclick="aToast('Review approved ✓')"><i class="ti ti-check"></i> Approve</button>
+          <button class="tbl-btn d" onclick="this.closest('.table-wrap').remove();aToast('Review removed')"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── PROMOTIONS ──
+function renderPromotions() {
+  document.getElementById('promotionsList').innerHTML=promotions.map(p=>`
+    <div class="table-wrap" style="margin-bottom:.65rem">
+      <div style="padding:.9rem 1.1rem;display:flex;align-items:center;gap:.9rem;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <div style="font-family:'Playfair Display',serif;font-size:13px;font-weight:600;margin-bottom:.2rem">${p.title}</div>
+          <div style="font-size:12px;color:var(--text-muted)">${p.desc}</div>
+        </div>
+        <span class="pill ${p.active?'pill-confirmed':'pill-closed'}">${p.active?'Active':'Inactive'}</span>
+        <div class="tbl-actions">
+          <button class="tbl-btn" onclick="togglePromo(${p.id})">${p.active?'Deactivate':'Activate'}</button>
+          <button class="tbl-btn d" onclick="deletePromo(${p.id})"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function togglePromo(id){const p=promotions.find(p=>p.id===id);if(p){p.active=!p.active;renderPromotions();aToast(`Promotion ${p.active?'activated':'deactivated'}`)}}
+function deletePromo(id){promotions=promotions.filter(p=>p.id!==id);renderPromotions();aToast('Promotion removed')}
+function addPromoModal(){const t=prompt('Promotion title:');if(!t)return;const d=prompt('Description:');if(!d)return;promotions.push({id:Date.now(),title:t,desc:d,active:true});renderPromotions();aToast('Promotion added ✓')}
+
+// ── BANNERS ──
+function renderBanners() {
+  document.getElementById('bannersList').innerHTML=banners.map(b=>`
+    <div class="table-wrap" style="margin-bottom:.65rem">
+      <div style="padding:.9rem 1.1rem;display:flex;align-items:center;gap:.9rem;flex-wrap:wrap">
+        <div style="flex:1;font-size:13px;min-width:180px">${b.text}</div>
+        <label class="toggle"><input type="checkbox" ${b.visible?'checked':''} onchange="toggleBanner(${b.id},this.checked)"><span class="toggle-slider"></span></label>
+        <span style="font-size:11px;color:var(--text-muted)">${b.visible?'Visible':'Hidden'}</span>
+      </div>
+    </div>`).join('');
+}
+function toggleBanner(id,val){const b=banners.find(b=>b.id===id);if(b){b.visible=val;renderBanners();aToast(`Banner ${val?'shown':'hidden'}`)}}
+
+// ── ADMIN TOAST ──
+function aToast(msg) {
+  const t=document.getElementById('adminToast');
+  t.innerHTML=`<i class="ti ti-check"></i>${msg}`;
+  t.classList.add('show');
+  clearTimeout(window._at);
+  window._at=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── MOBILE SIDEBAR ──
+function toggleSidebar() {
+  document.getElementById('adminSidebar').classList.toggle('open');
+}
+
+// ── SHAKE ANIMATION ──
+const _style = document.createElement('style');
+_style.textContent = `@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}`;
+document.head.appendChild(_style);
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+  renderSalonsGrid(SALONS);
+  updateAreaCounts();
+  updateMyBookingsBadge();
+  initMap();
+  document.getElementById('sbToggle').style.display='none';
+  // Close sidebar when clicking outside on mobile
+  document.addEventListener('click', e => {
+    const sb=document.getElementById('adminSidebar');
+    const tog=document.getElementById('sbToggle');
+    if(sb.classList.contains('open')&&!sb.contains(e.target)&&!tog.contains(e.target)){
+      sb.classList.remove('open');
+    }
+  });
+});
+</script>
+</body>
+</html>
